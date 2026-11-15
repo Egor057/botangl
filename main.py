@@ -159,7 +159,7 @@ from aiogram.exceptions import TelegramAPIError
 
 router = Router()
 
-BOT_TOKEN = "9084719584:AAE4LeWAMwUm1ynXJeMlKxZxaApC65UhkDg"
+BOT_TOKEN = os.getenv("BOT_TOKEN", "9084719584:AAE4LeWAMwUm1ynXJeMlKxZxaApC65UhkDg")
 ADMIN_TELEGRAM_ID = 9136166835
 
 DB_FILENAME = "users_database.json"
@@ -379,9 +379,12 @@ async def handle_start_command(message: Message, state: FSMContext) -> None:
         save_db(database)
 
     is_admin = (message.from_user.id == ADMIN_TELEGRAM_ID)
+    bot_info = await message.bot.get_me()
+    bot_username = f"@{bot_info.username}"
+    
     await message.answer(
         f"👋 Здравствуй, <b>{html.quote(message.from_user.first_name)}</b>!\n\n"
-        f"Добро пожаловать в бота <b>lang-bot2</b>.\n"
+        f"Добро пожаловать в бота <b>{bot_username}</b>.\n"
         f"Все функции, словарные базы (включая 5 блиц-спринтов), тренировки и режим чтения полностью активированы!",
         parse_mode="HTML",
         reply_markup=build_main_menu_keyboard(is_admin)
