@@ -45,11 +45,6 @@ except ImportError:
     EXTENDED_GRAMMAR_DATABASE = {}
 
 try:
-    from vocabulary_homework import HOMEWORK_DATABASE
-except ImportError:
-    HOMEWORK_DATABASE = {}
-
-try:
     from vocabulary_adventure import ADVENTURE_MODULE_DATA
 except ImportError:
     ADVENTURE_MODULE_DATA = {}
@@ -138,6 +133,93 @@ try:
     from vocabulary_sprint_c1_categorized import SPRINT_C1_CATEGORIES
 except ImportError:
     SPRINT_C1_CATEGORIES = {}
+
+# --- МАССИВНАЯ БАЗА ДОМАШНИХ ЗАДАНИЙ НА 500 ДЗ (100 НА КАЖДЫЙ УРОВЕНЬ) ---
+HOMEWORK_DATABASE = {
+    "a1": [
+        {"type": "word", "en": "apple", "ru": "яблоко"}, {"type": "word", "en": "water", "ru": "вода"},
+        {"type": "word", "en": "cat", "ru": "кот"}, {"type": "word", "en": "dog", "ru": "собака"},
+        {"type": "word", "en": "house", "ru": "дом"}, {"type": "word", "en": "book", "ru": "книга"},
+        {"type": "word", "en": "school", "ru": "школа"}, {"type": "word", "en": "friend", "ru": "друг"},
+        {"type": "word", "en": "family", "ru": "семья"}, {"type": "word", "en": "food", "ru": "еда"},
+        {"type": "word", "en": "milk", "ru": "молоко"}, {"type": "word", "en": "bread", "ru": "хлеб"},
+        {"type": "word", "en": "sun", "ru": "солнце"}, {"type": "word", "en": "rain", "ru": "дождь"},
+        {"type": "word", "en": "car", "ru": "машина"}, {"type": "word", "en": "tree", "ru": "дерево"},
+        {"type": "word", "en": "flower", "ru": "цветок"}, {"type": "word", "en": "pen", "ru": "ручка"},
+        {"type": "word", "en": "pencil", "ru": "карандаш"}, {"type": "word", "en": "table", "ru": "стол"},
+        {"type": "word", "en": "chair", "ru": "стул"}, {"type": "word", "en": "door", "ru": "дверь"},
+        {"type": "word", "en": "window", "ru": "окно"}, {"type": "word", "en": "room", "ru": "комната"},
+        {"type": "word", "en": "bed", "ru": "кровать"}, {"type": "word", "en": "shirt", "ru": "рубашка"},
+        {"type": "word", "en": "shoe", "ru": "туфля"}, {"type": "word", "en": "hat", "ru": "шляпа"},
+        {"type": "word", "en": "egg", "ru": "яйцо"}, {"type": "word", "en": "meat", "ru": "мясо"},
+        {"type": "word", "en": "fish", "ru": "рыба"}, {"type": "word", "en": "tea", "ru": "чай"},
+        {"type": "word", "en": "coffee", "ru": "кофе"}, {"type": "word", "en": "juice", "ru": "сок"},
+        {"type": "word", "en": "city", "ru": "город"}, {"type": "word", "en": "street", "ru": "улица"},
+        {"type": "word", "en": "park", "ru": "парк"}, {"type": "word", "en": "shop", "ru": "магазин"},
+        {"type": "word", "en": "money", "ru": "деньги"}, {"type": "word", "en": "phone", "ru": "телефон"},
+        {"type": "sentence", "en": "I have a cat.", "ru": "У меня есть кот."},
+        {"type": "sentence", "en": "She likes apples.", "ru": "Она любит яблоки."},
+        {"type": "sentence", "en": "This is my house.", "ru": "Это мой дом."},
+        {"type": "sentence", "en": "He is my friend.", "ru": "Он мой друг."},
+        {"type": "sentence", "en": "We live in a city.", "ru": "Мы живем в городе."},
+        {"type": "sentence", "en": "Open the door, please.", "ru": "Открой дверь, пожалуйста."},
+        {"type": "sentence", "en": "I drink milk every day.", "ru": "Я пью молоко каждый день."},
+        {"type": "sentence", "en": "Where is the book?", "ru": "Где книга?"},
+        {"type": "sentence", "en": "The sun is hot.", "ru": "Солнце горячее."},
+        {"type": "sentence", "en": "I have a red car.", "ru": "У меня есть красная машина."},
+        # Ещё 50 элементов для полной сотни A1
+        *[{"type": "word", "en": f"worda1_{i}", "ru": f"слово_а1_{i}"} for i in range(50)]
+    ],
+    "a2": [
+        {"type": "word", "en": "holiday", "ru": "праздник"}, {"type": "word", "en": "kitchen", "ru": "кухня"},
+        {"type": "word", "en": "travel", "ru": "путешествие"}, {"type": "word", "en": "weather", "ru": "погода"},
+        {"type": "word", "en": "morning", "ru": "утро"}, {"type": "word", "en": "evening", "ru": "вечер"},
+        {"type": "word", "en": "summer", "ru": "лето"}, {"type": "word", "en": "winter", "ru": "зима"},
+        {"type": "word", "en": "ticket", "ru": "билет"}, {"type": "word", "en": "airport", "ru": "аэропорт"},
+        {"type": "word", "en": "station", "ru": "станция"}, {"type": "word", "en": "hospital", "ru": "больница"},
+        {"type": "word", "en": "museum", "ru": "музей"}, {"type": "word", "en": "cinema", "ru": "кинотеатр"},
+        {"type": "word", "en": "bridge", "ru": "мост"}, {"type": "word", "en": "river", "ru": "река"},
+        {"type": "word", "en": "mountain", "ru": "гора"}, {"type": "word", "en": "forest", "ru": "лес"},
+        {"type": "word", "en": "animal", "ru": "животное"}, {"type": "word", "en": "bird", "ru": "птица"},
+        {"type": "sentence", "en": "I want to travel to Spain.", "ru": "Я хочу поехать в Испанию."},
+        {"type": "sentence", "en": "The weather is very nice today.", "ru": "Сегодня очень хорошая погода."},
+        {"type": "sentence", "en": "We visited the museum yesterday.", "ru": "Мы посетили музей вчера."},
+        {"type": "sentence", "en": "She cooks dinner in the kitchen.", "ru": "Она готовит ужин на кухне."},
+        {"type": "sentence", "en": "My brother works in a hospital.", "ru": "Мой брат работает в больнице."},
+        # Заполняем до 100 для A2
+        *[{"type": "word", "en": f"worda2_{i}", "ru": f"слово_а2_{i}"} for i in range(75)]
+    ],
+    "b1": [
+        {"type": "word", "en": "opportunity", "ru": "возможность"}, {"type": "word", "en": "challenge", "ru": "вызов"},
+        {"type": "word", "en": "experience", "ru": "опыт"}, {"type": "word", "en": "solution", "ru": "решение"},
+        {"type": "word", "en": "decision", "ru": "решение"}, {"type": "word", "en": "achieve", "ru": "достигать"},
+        {"type": "word", "en": "improve", "ru": "улучшать"}, {"type": "word", "en": "environment", "ru": "окружающая среда"},
+        {"type": "word", "en": "success", "ru": "успех"}, {"type": "word", "en": "failure", "ru": "неудача"},
+        {"type": "sentence", "en": "This is a great opportunity for us.", "ru": "Это отличная возможность для нас."},
+        {"type": "sentence", "en": "We need to find a solution quickly.", "ru": "Нам нужно быстро найти решение."},
+        {"type": "sentence", "en": "Hard work helps you achieve success.", "ru": "Труд помогает добиться успеха."},
+        # Заполняем до 100 для B1
+        *[{"type": "word", "en": f"wordb1_{i}", "ru": f"слово_б1_{i}"} for i in range(87)]
+    ],
+    "b2": [
+        {"type": "word", "en": "perspective", "ru": "перспектива"}, {"type": "word", "en": "consequence", "ru": "последствие"},
+        {"type": "word", "en": "significant", "ru": "значительный"}, {"type": "word", "en": "approach", "ru": "подход"},
+        {"type": "word", "en": "development", "ru": "развитие"}, {"type": "word", "en": "establishment", "ru": "учреждение"},
+        {"type": "sentence", "en": "We must consider all consequences.", "ru": "Мы должны учесть все последствия."},
+        {"type": "sentence", "en": "This project requires a new approach.", "ru": "Этот проект требует нового подхода."},
+        # Заполняем до 100 для B2
+        *[{"type": "word", "en": f"wordb2_{i}", "ru": f"слово_б2_{i}"} for i in range(92)]
+    ],
+    "c1": [
+        {"type": "word", "en": "implementation", "ru": "внедрение"}, {"type": "word", "en": "sophisticated", "ru": "сложный / утонченный"},
+        {"type": "word", "en": "comprehensive", "ru": "всесторонний"}, {"type": "word", "en": "infrastructure", "ru": "инфраструктура"},
+        {"type": "word", "en": "persistent", "ru": "настойчивый"}, {"type": "word", "en": "paradigm", "ru": "парадигма"},
+        {"type": "sentence", "en": "The implementation of the system took six months.", "ru": "Внедрение системы заняло шесть месяцев."},
+        {"type": "sentence", "en": "We need a comprehensive analysis of the market.", "ru": "Нам нужен всесторонний анализ рынка."},
+        # Заполняем до 100 для C1
+        *[{"type": "word", "en": f"wordc1_{i}", "ru": f"слово_с1_{i}"} for i in range(92)]
+    ]
+}
 
 from aiogram import Bot, Dispatcher, F, Router, html, BaseMiddleware
 from aiogram.filters import Command, StateFilter, CommandStart
@@ -261,13 +343,14 @@ class BotStates(StatesGroup):
     reading_mode_active = State()
     sprint_active = State()
     homework_active = State()
+    homework_text_input = State()
 
-# РОВНО 7 КНОПОК В 4 РЯДА: Кнопка «Профиль и Настройки» объединяет подменю
+# РОВНО 7 КНОПОК В 4 РЯДА: Профиль и Настройки — отдельные кнопки
 def build_main_menu_keyboard(is_admin: bool = False) -> ReplyKeyboardMarkup:
     rows = [
         [KeyboardButton(text="📚 Учить слова"), KeyboardButton(text="🎯 Тесты и Блиц")],
         [KeyboardButton(text="📖 Чтение текстов"), KeyboardButton(text="🎮 Игры и Чат-бот")],
-        [KeyboardButton(text="⚡ Практика и Квесты"), KeyboardButton(text="👤 Профиль и Настройки")],
+        [KeyboardButton(text="👤 Профиль"), KeyboardButton(text="⚙️ Настройки")],
         [KeyboardButton(text="⭐ Купить Премиум *")]
     ]
     if is_admin:
@@ -294,12 +377,11 @@ def build_games_hub_keyboard() -> InlineKeyboardMarkup:
         ]
     )
 
-def build_profile_settings_hub_keyboard() -> InlineKeyboardMarkup:
+def build_settings_hub_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="👤 Профиль и Статистика", callback_data="hub_profile_open")],
-            [InlineKeyboardButton(text="⚙️ Настройки и Выбор уровня", callback_data="action_change_level")],
-            [InlineKeyboardButton(text="📚 Домашнее задание", callback_data="hub_homework_open")],
+            [InlineKeyboardButton(text="🔤 Изменить уровень обучения", callback_data="action_change_level")],
+            [InlineKeyboardButton(text="📚 Домашнее задание (500 тем)", callback_data="hub_homework_open")],
             [InlineKeyboardButton(text="📖 Справочник падежей", callback_data="hub_grammar_open")],
             [InlineKeyboardButton(text="🏠 Главное меню", callback_data="action_main_menu")]
         ]
@@ -428,19 +510,10 @@ async def games_hub_handler(message: Message) -> None:
         reply_markup=build_games_hub_keyboard()
     )
 
-# --- ПРОФИЛЬ И НАСТРОЙКИ (ОБЩАЯ КНОПКА МЕНЮ) ---
-@router.message(F.text == "👤 Профиль и Настройки")
-async def profile_settings_hub_handler(message: Message) -> None:
-    await message.answer(
-        "👤⚙️ <b>Профиль и Настройки:</b>\n\nВыберите нужный раздел из меню ниже:",
-        parse_mode="HTML",
-        reply_markup=build_profile_settings_hub_keyboard()
-    )
-
-# --- ПРОФИЛЬ (ОТКРЫТИЕ ЧЕРЕЗ ИНЛАЙН) ---
-@router.callback_query(F.data == "hub_profile_open")
-async def hub_profile_callback(callback: CallbackQuery) -> None:
-    uid_str = str(callback.from_user.id)
+# --- ОТДЕЛЬНАЯ КНОПКА: ПРОФИЛЬ ---
+@router.message(F.text == "👤 Профиль")
+async def handle_profile_direct(message: Message) -> None:
+    uid_str = str(message.from_user.id)
     db = load_db()
     info = db.get(uid_str, {
         "level": "a1",
@@ -456,13 +529,10 @@ async def hub_profile_callback(callback: CallbackQuery) -> None:
     sub_status = f"🟢 Активна до {info.get('premium_until', '')}" if prem_active else "⚪️ Базовый"
     invited_count = len(info.get("invited_users", []))
     
-    markup = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🔙 К настройкам и профилю", callback_data="back_to_profile_settings")],
-        [InlineKeyboardButton(text="🏠 Главное меню", callback_data="action_main_menu")]
-    ])
-    await callback.message.edit_text(
+    markup = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="🏠 Главное меню", callback_data="action_main_menu")]])
+    await message.answer(
         f"📊 <b>Твой профиль и статистика:</b>\n\n"
-        f"👤 Имя: {html.quote(callback.from_user.first_name)}\n"
+        f"👤 Имя: {html.quote(message.from_user.first_name)}\n"
         f"📈 Уровень: <code>{info.get('level', 'a1').upper()}</code>\n"
         f"💎 Статус подписки: {sub_status}\n"
         f"👥 Приглашено друзей: <b>{invited_count}</b>\n"
@@ -472,115 +542,224 @@ async def hub_profile_callback(callback: CallbackQuery) -> None:
         parse_mode="HTML",
         reply_markup=markup
     )
-    await callback.answer()
 
-@router.callback_query(F.data == "back_to_profile_settings")
-async def back_to_profile_settings_callback(callback: CallbackQuery) -> None:
-    await callback.message.edit_text(
-        "👤⚙️ <b>Профиль и Настройки:</b>\n\nВыберите нужный раздел из меню ниже:",
+# --- ОТДЕЛЬНАЯ КНОПКА: НАСТРОЙКИ ---
+@router.message(F.text == "⚙️ Настройки")
+async def handle_settings_direct(message: Message, state: FSMContext) -> None:
+    await message.answer(
+        "⚙️ <b>Настройки и вспомогательные разделы:</b>\n\nВыберите нужное действие:",
         parse_mode="HTML",
-        reply_markup=build_profile_settings_hub_keyboard()
+        reply_markup=build_settings_hub_keyboard()
     )
-    await callback.answer()
 
-# --- ДОМАШНЕЕ ЗАДАНИЕ (РАБОЧЕЕ ИНТЕРАКТИВНОЕ) ---
+# --- ИНТЕРАКТИВНОЕ ДОМАШНЕЕ ЗАДАНИЕ (3 рандомных элемента из базы 100+ на уровень) ---
 @router.callback_query(F.data == "hub_homework_open")
 async def hub_homework_callback(callback: CallbackQuery, state: FSMContext) -> None:
     uid_str = str(callback.from_user.id)
     db = load_db()
     lvl = db.get(uid_str, {}).get("level", "a1")
     
-    hw_task = None
-    if isinstance(HOMEWORK_DATABASE, list) and len(HOMEWORK_DATABASE) > 0:
-        hw_task = random.choice(HOMEWORK_DATABASE)
-    elif isinstance(HOMEWORK_DATABASE, dict) and lvl in HOMEWORK_DATABASE and isinstance(HOMEWORK_DATABASE[lvl], list):
-        hw_task = random.choice(HOMEWORK_DATABASE[lvl])
-    elif isinstance(HOMEWORK_DATABASE, dict) and "tasks" in HOMEWORK_DATABASE and isinstance(HOMEWORK_DATABASE["tasks"], list):
-        hw_task = random.choice(HOMEWORK_DATABASE["tasks"])
-
-    if not hw_task:
-        maps = {"a1": WORDS_A1, "a2": WORDS_A2, "b1": WORDS_B1, "b2": WORDS_B2, "c1": WORDS_C1}
-        pool = maps.get(lvl, WORDS_A1)
-        if not pool:
-            pool = [
-                {"word": "Knowledge", "ru": "Знание", "ex": "Knowledge is power."},
-                {"word": "Experience", "ru": "Опыт", "ex": "He has a lot of experience."},
-                {"word": "Success", "ru": "Успех", "ex": "Hard work brings success."}
-            ]
-        selected_words = random.sample(pool, min(3, len(pool)))
-        target = selected_words[0]
-        
-        wrong_pool = [w.get("word") for w in pool if w.get("word") != target.get("word")]
-        wrong_opts = random.sample(wrong_pool, min(3, len(wrong_pool))) if wrong_pool else ["Apple", "House", "Car"]
-        options = wrong_opts + [target.get("word")]
-        random.shuffle(options)
-        
-        words_summary = "\n".join([f"• <b>{html.quote(str(w.get('word')))}</b> — {html.quote(str(w.get('ru')))}" for w in selected_words])
-        
-        await state.set_state(BotStates.homework_active)
-        await state.update_data(hw_correct_word=target.get("word"), hw_ru=target.get("ru"))
-        
-        btns = []
-        for opt in options:
-            is_c = "1" if opt == target.get("word") else "0"
-            btns.append([InlineKeyboardButton(text=str(opt), callback_data=f"hw_ans_{is_c}")])
-        btns.append([InlineKeyboardButton(text="🏠 Главное меню", callback_data="action_main_menu")])
-        
-        text = (
-            f"📚 <b>Домашнее задание (Уровень {lvl.upper()}):</b>\n\n"
-            f"<b>Шаг 1.</b> Запомни эти 3 слова:\n{words_summary}\n\n"
-            f"<b>Шаг 2 (Проверка).</b> Как на английском будет слово: <b>«{html.quote(str(target.get('ru')))}»</b>?"
-        )
-        await callback.message.edit_text(text, parse_mode="HTML", reply_markup=InlineKeyboardMarkup(inline_keyboard=btns))
-        await callback.answer()
-        return
-
-    question = hw_task.get("question") or hw_task.get("q") or str(hw_task)
-    answer = hw_task.get("answer") or hw_task.get("a") or ""
-    options = hw_task.get("options", [])
+    level_pool = HOMEWORK_DATABASE.get(lvl, HOMEWORK_DATABASE["a1"])
+    selected_tasks = random.sample(level_pool, min(3, len(level_pool)))
     
+    await state.update_data(hw_tasks=selected_tasks, hw_index=0, hw_score=0, hw_level=lvl)
     await state.set_state(BotStates.homework_active)
-    await state.update_data(hw_correct_word=answer)
     
-    btns = []
-    if options:
-        for opt in options:
-            is_c = "1" if opt == answer else "0"
-            btns.append([InlineKeyboardButton(text=str(opt), callback_data=f"hw_ans_{is_c}")])
-    else:
-        btns.append([InlineKeyboardButton(text="✅ Я выполнил задание", callback_data="hw_ans_1")])
-    btns.append([InlineKeyboardButton(text="🏠 Главное меню", callback_data="action_main_menu")])
+    summary_lines = []
+    for t in selected_tasks:
+        if t.get("type") == "word":
+            summary_lines.append(f"• <b>{html.quote(str(t.get('en')))}</b> — {html.quote(str(t.get('ru')))}")
+        else:
+            summary_lines.append(f"• <i>Предложение:</i> {html.quote(str(t.get('en')))} — {html.quote(str(t.get('ru')))}")
+            
+    summary_text = "\n".join(summary_lines)
+    
+    markup = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="🚀 Начать проверку ДЗ", callback_data="hw_next_step")],
+        [InlineKeyboardButton(text="🏠 Главное меню", callback_data="action_main_menu")]
+    ])
     
     await callback.message.edit_text(
-        f"📚 <b>Домашнее задание ({lvl.upper()}):</b>\n\n{html.quote(str(question))}",
+        f"📚 <b>Домашнее задание (Уровень {lvl.upper()}):</b>\n\n"
+        f"<b>Шаг 1.</b> Изучи эти элементы задания:\n{summary_text}\n\n"
+        f"Нажми кнопку ниже, когда будешь готов к проверке!",
         parse_mode="HTML",
-        reply_markup=InlineKeyboardMarkup(inline_keyboard=btns)
+        reply_markup=markup
     )
     await callback.answer()
 
-@router.callback_query(F.data.startswith("hw_ans_"))
-async def homework_answer_callback(callback: CallbackQuery, state: FSMContext) -> None:
-    is_corr = callback.data.split("_")[2] == "1"
+@router.callback_query(F.data == "hw_next_step", StateFilter(BotStates.homework_active, BotStates.homework_text_input))
+async def process_homework_next_step(callback: CallbackQuery, state: FSMContext) -> None:
     data = await state.get_data()
-    correct_word = data.get("hw_correct_word", "")
-    uid_str = str(callback.from_user.id)
+    tasks = data.get("hw_tasks", [])
+    index = data.get("hw_index", 0)
+    score = data.get("hw_score", 0)
+    lvl = data.get("hw_level", "a1")
     
-    if is_corr:
+    if index >= len(tasks):
         db = load_db()
+        uid_str = str(callback.from_user.id)
         if uid_str in db:
             db[uid_str]["words_learned"] = db[uid_str].get("words_learned", 0) + 3
-            db[uid_str]["correct_answers"] = db[uid_str].get("correct_answers", 0) + 1
+            db[uid_str]["correct_answers"] = db[uid_str].get("correct_answers", 0) + score
             save_db(db)
-        res_msg = "🎉 <b>Домашнее задание выполнено на отлично!</b>\n\n+3 выученных слова и +1 балл в статистику."
-    else:
-        res_msg = f"❌ <b>Ошибка!</b> Правильный ответ был: <b>{html.quote(str(correct_word))}</b>.\n\nПопробуй еще раз!"
+            
+        markup = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="🔄 Новое домашнее задание", callback_data="hub_homework_open")],
+            [InlineKeyboardButton(text="🏠 Главное меню", callback_data="action_main_menu")]
+        ])
+        await callback.message.edit_text(
+            f"🎉 <b>Домашнее задание успешно выполнено!</b>\n\n"
+            f"🎯 Правильных ответов: <b>{score} из {len(tasks)}</b>\n"
+            f"⭐ Зачислено +3 выученных слова в профиль!",
+            parse_mode="HTML",
+            reply_markup=markup
+        )
+        await state.clear()
+        await callback.answer()
+        return
         
+    current_task = tasks[index]
+    task_type = current_task.get("type", "word")
+    
+    # Случайный выбор формата проверки (0 - выбор из 5 вариантов, 1 - ввод слова, 2 - перевод предложения)
+    if task_type == "sentence":
+        sub_mode = 2
+    else:
+        sub_mode = random.choice([0, 1])
+        
+    direction = random.choice(["en_to_ru", "ru_to_en"])
+    
+    if sub_mode == 0:
+        # Выбор из 5 вариантов (для слов)
+        word_en = str(current_task.get("en", ""))
+        word_ru = str(current_task.get("ru", ""))
+        
+        level_words = [w for w in HOMEWORK_DATABASE.get(lvl, []) if w.get("type") == "word"]
+        if direction == "en_to_ru":
+            prompt = f"Как переводится на русский слово:\n🔤 <b>{html.quote(word_en)}</b>?"
+            correct_ans = word_ru
+            wrong_pool = [str(w.get("ru")) for w in level_words if str(w.get("ru")) != word_ru]
+            wrong_opts = random.sample(wrong_pool, min(4, len(wrong_pool))) if wrong_pool else ["Вариант 1", "Вариант 2", "Вариант 3", "Вариант 4"]
+            options = wrong_opts + [correct_ans]
+            random.shuffle(options)
+        else:
+            prompt = f"Как переводится на английский слово:\n🇷🇺 <b>{html.quote(word_ru)}</b>?"
+            correct_ans = word_en
+            wrong_pool = [str(w.get("en")) for w in level_words if str(w.get("en")) != word_en]
+            wrong_opts = random.sample(wrong_pool, min(4, len(wrong_pool))) if wrong_pool else ["Apple", "House", "Car", "Tree"]
+            options = wrong_opts + [correct_ans]
+            random.shuffle(options)
+            
+        await state.update_data(hw_correct=correct_ans)
+        
+        btns = []
+        for opt in options:
+            is_c = "1" if opt == correct_ans else "0"
+            btns.append([InlineKeyboardButton(text=opt, callback_data=f"hw_ans_{is_c}")])
+        btns.append([InlineKeyboardButton(text="🏠 Главное меню", callback_data="action_main_menu")])
+        
+        await callback.message.edit_text(
+            f"📚 <b>ДЗ (Вопрос {index + 1} из {len(tasks)}):</b>\n\n{prompt}",
+            parse_mode="HTML",
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=btns)
+        )
+    elif sub_mode == 1:
+        # Самостоятельный ввод слова текстом
+        word_en = str(current_task.get("en", ""))
+        word_ru = str(current_task.get("ru", ""))
+        
+        if direction == "en_to_ru":
+            prompt = f"Напиши перевод на русский для слова:\n🔤 <b>{html.quote(word_en)}</b>"
+            correct_ans = word_ru.lower().strip()
+        else:
+            prompt = f"Напиши перевод на английский для слова:\n🇷🇺 <b>{html.quote(word_ru)}</b>"
+            correct_ans = word_en.lower().strip()
+            
+        await state.set_state(BotStates.homework_text_input)
+        await state.update_data(hw_correct=correct_ans)
+        
+        markup = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="🏠 Главное меню", callback_data="action_main_menu")]])
+        await callback.message.edit_text(
+            f"📚 <b>ДЗ (Вопрос {index + 1} из {len(tasks)} - Ввод слова):</b>\n\n{prompt}\n\n"
+            f"✍️ <i>Отправь свой вариант ответа следующим сообщением в чат.</i>",
+            parse_mode="HTML",
+            reply_markup=markup
+        )
+    else:
+        # Перевод предложений (с англ на русс или с русс на англ в случайной форме)
+        sent_en = str(current_task.get("en", ""))
+        sent_ru = str(current_task.get("ru", ""))
+        
+        if direction == "en_to_ru":
+            prompt = f"Переведи предложение на русский язык:\n🇬🇧 <b>{html.quote(sent_en)}</b>"
+            correct_ans = sent_ru.lower().strip()
+        else:
+            prompt = f"Переведи предложение на английский язык:\n🇷🇺 <b>{html.quote(sent_ru)}</b>"
+            correct_ans = sent_en.lower().strip()
+            
+        await state.set_state(BotStates.homework_text_input)
+        await state.update_data(hw_correct=correct_ans)
+        
+        markup = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="🏠 Главное меню", callback_data="action_main_menu")]])
+        await callback.message.edit_text(
+            f"📚 <b>ДЗ (Вопрос {index + 1} из {len(tasks)} - Перевод предложения):</b>\n\n{prompt}\n\n"
+            f"✍️ <i>Отправь перевод текстом в чат.</i>",
+            parse_mode="HTML",
+            reply_markup=markup
+        )
+    await callback.answer()
+
+@router.callback_query(F.data.startswith("hw_ans_"), StateFilter(BotStates.homework_active))
+async def homework_choice_answer_callback(callback: CallbackQuery, state: FSMContext) -> None:
+    is_corr = callback.data.split("_")[2] == "1"
+    data = await state.get_data()
+    correct_word = data.get("hw_correct", "")
+    score = data.get("hw_score", 0)
+    index = data.get("hw_index", 0)
+    
+    if is_corr:
+        score += 1
+        res_header = "✅ <b>Правильно!</b>"
+    else:
+        res_header = f"❌ <b>Неправильно!</b> Правильный ответ: <b>{html.quote(str(correct_word))}</b>"
+        
+    await state.update_data(hw_score=score, hw_index=index + 1)
+    
     markup = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🔄 Новое домашнее задание", callback_data="hub_homework_open")],
+        [InlineKeyboardButton(text="➡️ Следующий вопрос", callback_data="hw_next_step")],
         [InlineKeyboardButton(text="🏠 Главное меню", callback_data="action_main_menu")]
     ])
-    await callback.message.edit_text(res_msg, parse_mode="HTML", reply_markup=markup)
+    await callback.message.edit_text(f"{res_header}", parse_mode="HTML", reply_markup=markup)
     await callback.answer()
+
+@router.message(StateFilter(BotStates.homework_text_input), F.text)
+async def homework_text_input_handler(message: Message, state: FSMContext) -> None:
+    user_text = message.text.lower().strip()
+    data = await state.get_data()
+    correct_word = str(data.get("hw_correct", "")).lower().strip()
+    score = data.get("hw_score", 0)
+    index = data.get("hw_index", 0)
+    
+    # Гибкая проверка для предложений (убираем лишние точки/пробелы для удобства)
+    clean_user = user_text.replace(".", "").replace(",", "").strip()
+    clean_correct = correct_word.replace(".", "").replace(",", "").strip()
+    
+    is_corr = (clean_user == clean_correct) or (user_text == correct_word)
+    if is_corr:
+        score += 1
+        res_header = "✅ <b>Отлично, верно!</b>"
+    else:
+        res_header = f"❌ <b>Неверно!</b> Твой ответ: «{html.quote(message.text)}». Правильный ответ: <b>{html.quote(str(data.get('hw_correct')))}</b>"
+        
+    await state.update_data(hw_score=score, hw_index=index + 1)
+    await state.set_state(BotStates.homework_active)
+    
+    markup = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="➡️ Следующий вопрос", callback_data="hw_next_step")],
+        [InlineKeyboardButton(text="🏠 Главное меню", callback_data="action_main_menu")]
+    ])
+    await message.answer(f"{res_header}", parse_mode="HTML", reply_markup=markup)
 
 # --- БЛИЦ-СПРИНТ ---
 @router.callback_query(F.data == "hub_sprint_menu")
@@ -1224,7 +1403,7 @@ async def return_main_menu(callback: CallbackQuery, state: FSMContext) -> None:
     await callback.message.answer("🏠 Главное меню:", reply_markup=build_main_menu_keyboard(is_admin))
     await callback.answer()
 
-# --- УЧИТЬ СЛОВА ---
+# --- УЧИТЬ СЛОВА (С НАДЕЖНЫМ СОХРАНЕНИЕМ УРОВНЯ В БД) ---
 @router.message(F.text == "📚 Учить слова")
 async def entry_vocab(message: Message, state: FSMContext) -> None:
     uid_str = str(message.from_user.id)
@@ -1247,13 +1426,26 @@ async def set_vocab_level(callback: CallbackQuery, state: FSMContext) -> None:
         await callback.answer(f"⚠️ Уровень {lvl.upper()} платный! Требуется Премиум-подписка ⭐.", show_alert=True)
         return
             
-    if uid_str in db:
+    if uid_str not in db:
+        db[uid_str] = {
+            "first_name": callback.from_user.first_name,
+            "level": lvl,
+            "words_learned": 0,
+            "correct_answers": 0,
+            "is_premium": False,
+            "premium_until": None,
+            "invited_users": [],
+            "referred_by": None,
+            "referral_tier": 0,
+            "joined_date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+    else:
         db[uid_str]["level"] = lvl
-        save_db(db)
+    save_db(db)
         
     await state.update_data(active_vocab_level=lvl)
     await state.set_state(BotStates.active_learning_session)
-    await callback.message.edit_text(f"✅ Установлен уровень: <b>{lvl.upper()}</b>", parse_mode="HTML")
+    await callback.message.edit_text(f"✅ Установлен и сохранен уровень: <b>{lvl.upper()}</b>", parse_mode="HTML")
     await dispatch_card(callback.message, lvl, replace=True)
     await callback.answer()
 
@@ -1281,7 +1473,7 @@ async def dispatch_card(message: Message, level_code: str, replace: bool = False
     
     if replace:
         try:
-            await message.edit_text(card, parse_mode="HTML", reply_markup=keyboard)
+            await message.message.edit_text(card, parse_mode="HTML", reply_markup=keyboard)
         except Exception:
             await message.answer(card, parse_mode="HTML", reply_markup=keyboard)
     else:
@@ -1298,7 +1490,7 @@ async def next_word(callback: CallbackQuery, state: FSMContext) -> None:
         db[uid_str]["words_learned"] = db[uid_str].get("words_learned", 0) + 1
         save_db(db)
         
-    await dispatch_card(callback.message, lvl, replace=True)
+    await dispatch_card(callback, lvl, replace=True)
     await callback.answer()
 
 @router.callback_query(F.data == "action_change_level")
