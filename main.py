@@ -8,10 +8,6 @@ import shutil
 from datetime import datetime, timedelta
 from typing import Dict, List, Any, Optional, Union, Callable, Awaitable
 
-# =============================================================================
-# РАСШИРЕННАЯ СИСТЕМА ЛОГИРОВАНИЯ
-# =============================================================================
-
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s (Line %(lineno)d): %(message)s",
@@ -19,20 +15,15 @@ logging.basicConfig(
 )
 logger = logging.getLogger("LanguageBotCore")
 
-# =============================================================================
-# ФОНОВЫЙ KEEP-ALIVE HTTP-СЕРВЕР ДЛЯ RENDER (ПОРТ 10000)
-# =============================================================================
-
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import threading
 
 class RenderKeepAliveHandler(BaseHTTPRequestHandler):
-    do_GET = lambda self: (
-        self.send_response(200),
-        self.send_header("Content-type", "text/plain; charset=utf-8"),
-        self.end_headers(),
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Content-type", "text/plain; charset=utf-8")
+        self.end_headers()
         self.wfile.write(b"LanguageBotCore Web Service is active and fully operational 24/7!")
-    )
 
     def log_message(self, format: str, *args: Any) -> None:
         pass
@@ -47,10 +38,6 @@ def start_web_server_daemon() -> None:
         logger.critical(f"Failed to start background HTTP server on port {port}: {ex}")
 
 threading.Thread(target=start_web_server_daemon, daemon=True).start()
-
-# =============================================================================
-# ВНЕШНИЕ ИМПОРТЫ СЛОВАРЕЙ И БАЗ ДАННЫХ
-# =============================================================================
 
 try:
     from vocabulary_grammar import EXTENDED_GRAMMAR_DATABASE
@@ -112,9 +99,45 @@ try:
 except ImportError:
     WORDS_C1 = []
 
-# =============================================================================
-# ИМПОРТЫ AIOGRAM 3.X И МИДЛВАРЕЙ
-# =============================================================================
+try:
+    from vocabulary_radin_b1 import READING_PASSAGES_B1
+except ImportError:
+    READING_PASSAGES_B1 = []
+
+try:
+    from vocabulary_radin_b2 import READING_PASSAGES_B2
+except ImportError:
+    READING_PASSAGES_B2 = []
+
+try:
+    from vocabulary_radin_c1 import READING_PASSAGES_C1
+except ImportError:
+    READING_PASSAGES_C1 = []
+
+try:
+    from vocabulary_sprint_a1 import SPRINT_A1_CATEGORIES
+except ImportError:
+    SPRINT_A1_CATEGORIES = {}
+
+try:
+    from vocabulary_sprint_a2 import SPRINT_A2_CATEGORIES
+except ImportError:
+    SPRINT_A2_CATEGORIES = {}
+
+try:
+    from vocabulary_sprint_b1_categorized import SPRINT_B1_CATEGORIES
+except ImportError:
+    SPRINT_B1_CATEGORIES = {}
+
+try:
+    from vocabulary_sprint_b2_categorized import SPRINT_B2_CATEGORIES
+except ImportError:
+    SPRINT_B2_CATEGORIES = {}
+
+try:
+    from vocabulary_sprint_c1_categorized import SPRINT_C1_CATEGORIES
+except ImportError:
+    SPRINT_C1_CATEGORIES = {}
 
 from aiogram import Bot, Dispatcher, F, Router, html, BaseMiddleware
 from aiogram.filters import Command, StateFilter, CommandStart
@@ -161,10 +184,6 @@ class LoggingMiddleware(BaseMiddleware):
 
 router.message.middleware(LoggingMiddleware())
 router.callback_query.middleware(LoggingMiddleware())
-
-# =============================================================================
-# МЕНЕДЖЕР БАЗЫ ДАННЫХ И ПРЕМИУМ-УТИЛИТЫ
-# =============================================================================
 
 def initialize_database() -> None:
     try:
@@ -230,10 +249,6 @@ def add_premium_days(user_data: dict, days: int) -> None:
     user_data["is_premium"] = True
     user_data["premium_until"] = new_until.strftime("%Y-%m-%d %H:%M:%S")
 
-# =============================================================================
-# МАШИНА СОСТОЯНИЙ (FSM STATES)
-# =============================================================================
-
 class BotStates(StatesGroup):
     selecting_vocabulary_level = State()
     active_learning_session = State()
@@ -243,19 +258,17 @@ class BotStates(StatesGroup):
     travel_mode_active = State()
     chat_sim_active = State()
     adventure_active = State()
-
-# =============================================================================
-# КЛАВИАТУРЫ
-# =============================================================================
+    reading_mode_active = State()
+    sprint_active = State()
 
 def build_main_menu_keyboard(is_admin: bool = False) -> ReplyKeyboardMarkup:
-    # Убрали отдельную кнопку рефералки, оставили в премиум-разделе
     rows = [
-        [KeyboardButton(text="📚 Учить слова"), KeyboardButton(text="📚 Домашнее задание")],
-        [KeyboardButton(text="🎯 Режим тестов"), KeyboardButton(text="⚡ Тренажер фраз")],
-        [KeyboardButton(text="🗺 Путешествия"), KeyboardButton(text="🤖 Чат-бот сим")],
-        [KeyboardButton(text="🎮 Игры и Детектив"), KeyboardButton(text="⚔️ Приключения")],
-        [KeyboardButton(text="📖 Справочник падежей"), KeyboardButton(text="👤 Профиль и Статистика")],
+        [KeyboardButton(text="📚 Учить слова"), KeyboardButton(text="📖 Чтение текстов")],
+        [KeyboardButton(text="🎯 Режим тестов"), KeyboardButton(text="⚡ Спринт (Блиц)")],
+        [KeyboardButton(text="⚡ Тренажер фраз"), KeyboardButton(text="🗺 Путешествия")],
+        [KeyboardButton(text="🤖 Чат-бот сим"), KeyboardButton(text="🎮 Игры и Детектив")],
+        [KeyboardButton(text="⚔️ Приключения"), KeyboardButton(text="📖 Справочник падежей")],
+        [KeyboardButton(text="📚 Домашнее задание"), KeyboardButton(text="👤 Профиль и Статистика")],
         [KeyboardButton(text="⭐ Купить Премиум *"), KeyboardButton(text="⚙️ Настройки")]
     ]
     if is_admin:
@@ -263,7 +276,6 @@ def build_main_menu_keyboard(is_admin: bool = False) -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(keyboard=rows, resize_keyboard=True, persistent=True)
 
 def build_premium_hub_keyboard() -> InlineKeyboardMarkup:
-    """Меню внутри Премиума с тремя подблоками по запросу пользователя."""
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [InlineKeyboardButton(text="⭐ Купить Премиум (Stars)", callback_data="prem_hub_buy")],
@@ -285,11 +297,24 @@ def build_levels_selection_keyboard() -> InlineKeyboardMarkup:
         ]
     )
 
-def build_learning_actions_keyboard() -> InlineKeyboardMarkup:
+def build_sprint_levels_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="➡️ Следующее слово", callback_data="action_next_word")],
-            [InlineKeyboardButton(text="🔤 Изменить уровень", callback_data="action_change_level")],
+            [InlineKeyboardButton(text="🟢 Спринт A1 (300 слов, 5 тем)", callback_data="sprint_lvl_a1")],
+            [InlineKeyboardButton(text="🟢 Спринт A2 (300 слов, 5 тем)", callback_data="sprint_lvl_a2")],
+            [InlineKeyboardButton(text="🟡 Спринт B1 (Премиум ⭐)", callback_data="sprint_lvl_b1")],
+            [InlineKeyboardButton(text="🟠 Спринт B2 (Премиум ⭐)", callback_data="sprint_lvl_b2")],
+            [InlineKeyboardButton(text="🔴 Спринт C1 (Премиум ⭐)", callback_data="sprint_lvl_c1")],
+            [InlineKeyboardButton(text="🏠 Главное меню", callback_data="action_main_menu")]
+        ]
+    )
+
+def build_reading_levels_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="🟡 Уровень B1 (10 текстов)", callback_data="readlvl_b1")],
+            [InlineKeyboardButton(text="🟠 Уровень B2 (10 текстов)", callback_data="readlvl_b2")],
+            [InlineKeyboardButton(text="🔴 Уровень C1 (10 текстов)", callback_data="readlvl_c1")],
             [InlineKeyboardButton(text="🏠 Главное меню", callback_data="action_main_menu")]
         ]
     )
@@ -311,10 +336,6 @@ def build_games_menu_keyboard() -> InlineKeyboardMarkup:
             [InlineKeyboardButton(text="🏠 Главное меню", callback_data="action_main_menu")]
         ]
     )
-
-# =============================================================================
-# ОБРАБОТЧИКИ КОМАНД И СООБЩЕНИЙ
-# =============================================================================
 
 @router.message(CommandStart())
 async def handle_start_command(message: Message, state: FSMContext) -> None:
@@ -361,14 +382,407 @@ async def handle_start_command(message: Message, state: FSMContext) -> None:
     await message.answer(
         f"👋 Здравствуй, <b>{html.quote(message.from_user.first_name)}</b>!\n\n"
         f"Добро пожаловать в бота <b>lang-bot2</b>.\n"
-        f"Все функции и реферальная система теперь доступны прямо через меню Премиума!",
+        f"Все функции, словарные базы (включая 5 блиц-спринтов), тренировки и режим чтения полностью активированы!",
         parse_mode="HTML",
         reply_markup=build_main_menu_keyboard(is_admin)
     )
 
-# =============================================================================
-# ПРЕМИУМ ХАБ (ВКЛЮЧАЕТ ПОКУПКУ, ВЫВОД ДРУЗЕЙ И РЕФЕРАЛЬНУЮ ССЫЛКУ)
-# =============================================================================
+@router.message(F.text == "⚡ Спринт (Блиц)")
+async def sprint_menu_handler(message: Message, state: FSMContext) -> None:
+    await state.clear()
+    await message.answer(
+        "⚡ <b>Режим «Спринт (Блиц)»</b>\n\n"
+        "Выберите уровень для молниеносной тренировки словарного запаса (по 300 слов, разбитых на 5 тем в каждом уровне):",
+        parse_mode="HTML",
+        reply_markup=build_sprint_levels_keyboard()
+    )
+
+@router.callback_query(F.data.startswith("sprint_lvl_"))
+async def sprint_level_selected_callback(callback: CallbackQuery, state: FSMContext) -> None:
+    lvl = callback.data.split("_")[2]
+    uid_str = str(callback.from_user.id)
+    db = load_db()
+    is_prem = is_user_premium(db.get(uid_str, {}))
+    
+    if lvl in ["b1", "b2", "c1"] and not is_prem:
+        await callback.answer(f"⚠️ Уровень {lvl.upper()} для Спринта требует Премиум-подписку ⭐!", show_alert=True)
+        return
+        
+    categories_map = {
+        "a1": SPRINT_A1_CATEGORIES,
+        "a2": SPRINT_A2_CATEGORIES,
+        "b1": SPRINT_B1_CATEGORIES,
+        "b2": SPRINT_B2_CATEGORIES,
+        "c1": SPRINT_C1_CATEGORIES
+    }
+    categories = categories_map.get(lvl, {})
+    if not categories:
+        await callback.answer("⚠️ Словарь для этого уровня спринта еще не заполнен.", show_alert=True)
+        return
+        
+    btns = []
+    for cat_key, words_list in categories.items():
+        cat_title = cat_key.replace("_", " ").title()
+        btns.append([InlineKeyboardButton(text=f"📂 {cat_title} ({len(words_list)} слов)", callback_data=f"spcat_{lvl}_{cat_key}")])
+        
+    btns.append([InlineKeyboardButton(text="🔙 К выбору уровней спринта", callback_data="back_to_sprint_menu")])
+    btns.append([InlineKeyboardButton(text="🏠 Главное меню", callback_data="action_main_menu")])
+    
+    await callback.message.edit_text(
+        f"⚡ <b>Спринт: Уровень {lvl.upper()}</b>\n\nВыберите категорию для тренировки:",
+        parse_mode="HTML",
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=btns)
+    )
+    await callback.answer()
+
+@router.callback_query(F.data == "back_to_sprint_menu")
+async def back_to_sprint_menu_callback(callback: CallbackQuery) -> None:
+    await callback.message.edit_text(
+        "⚡ <b>Режим «Спринт (Блиц)»</b>\n\nВыберите уровень для тренировки:",
+        parse_mode="HTML",
+        reply_markup=build_sprint_levels_keyboard()
+    )
+    await callback.answer()
+
+@router.callback_query(F.data.startswith("spcat_"))
+async def start_sprint_category_session(callback: CallbackQuery, state: FSMContext) -> None:
+    parts = callback.data.split("_", 2)
+    lvl = parts[1]
+    cat_key = parts[2]
+    
+    categories_map = {
+        "a1": SPRINT_A1_CATEGORIES,
+        "a2": SPRINT_A2_CATEGORIES,
+        "b1": SPRINT_B1_CATEGORIES,
+        "b2": SPRINT_B2_CATEGORIES,
+        "c1": SPRINT_C1_CATEGORIES
+    }
+    categories = categories_map.get(lvl, {})
+    words_list = categories.get(cat_key, [])
+    
+    if not words_list:
+        await callback.answer("⚠️ В этой категории пока нет слов.", show_alert=True)
+        return
+        
+    session_words = list(words_list)
+    random.shuffle(session_words)
+    
+    await state.update_data(
+        sprint_lvl=lvl,
+        sprint_cat=cat_key,
+        sprint_words=session_words,
+        sprint_index=0,
+        sprint_score=0
+    )
+    await state.set_state(BotStates.sprint_active)
+    
+    await send_next_sprint_question(callback.message, state, is_edit=True)
+    await callback.answer()
+
+async def send_next_sprint_question(message: Message, state: FSMContext, is_edit: bool = False) -> None:
+    data = await state.get_data()
+    words = data.get("sprint_words", [])
+    index = data.get("sprint_index", 0)
+    score = data.get("sprint_score", 0)
+    lvl = data.get("sprint_lvl", "a1")
+    cat_key = data.get("sprint_cat", "")
+    
+    if index >= len(words) or index >= 20:
+        markup = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="🔄 Сыграть снова в эту тему", callback_data=f"spcat_{lvl}_{cat_key}")],
+            [InlineKeyboardButton(text="⚡ К выбору тем спринта", callback_data=f"sprint_lvl_{lvl}")],
+            [InlineKeyboardButton(text="🏠 Главное меню", callback_data="action_main_menu")]
+        ])
+        text = (
+            f"🎉 <b>Спринт завершен!</b>\n\n"
+            f"🎯 Ваш результат: <b>{score} из {min(len(words), 20)}</b> правильных ответов!"
+        )
+        if is_edit:
+            await message.edit_text(text, parse_mode="HTML", reply_markup=markup)
+        else:
+            await message.answer(text, parse_mode="HTML", reply_markup=markup)
+        return
+        
+    current_item = words[index]
+    word_en = current_item.get("word", "")
+    correct_ru = current_item.get("ru", "")
+    
+    all_rus = [w.get("ru") for w in words if w.get("ru") != correct_ru]
+    num_opts = min(3, len(all_rus))
+    wrong_opts = random.sample(all_rus, num_opts) if num_opts > 0 else ["Нет варианта"]
+    
+    options = wrong_opts + [correct_ru]
+    random.shuffle(options)
+    
+    await state.update_data(current_sprint_correct=correct_ru)
+    
+    btns = []
+    for opt in options:
+        is_corr_str = "1" if opt == correct_ru else "0"
+        btns.append([InlineKeyboardButton(text=opt, callback_data=f"spans_{is_corr_str}")])
+        
+    btns.append([InlineKeyboardButton(text="❌ Завершить спринт", callback_data=f"sprint_lvl_{lvl}")])
+    
+    text = (
+        f"⚡ <b>Спринт ({lvl.upper()}): Вопрос {index + 1} / {min(len(words), 20)}</b>\n"
+        f"🏆 Счет: {score}\n\n"
+        f"Как переводится слово:\n🔤 <b>{html.quote(word_en)}</b>?"
+    )
+    
+    markup = InlineKeyboardMarkup(inline_keyboard=btns)
+    if is_edit:
+        await message.edit_text(text, parse_mode="HTML", reply_markup=markup)
+    else:
+        await message.answer(text, parse_mode="HTML", reply_markup=markup)
+
+@router.callback_query(F.data.startswith("spans_"), StateFilter(BotStates.sprint_active))
+async def process_sprint_answer(callback: CallbackQuery, state: FSMContext) -> None:
+    is_correct = callback.data.split("_")[1] == "1"
+    data = await state.get_data()
+    
+    score = data.get("sprint_score", 0)
+    if is_correct:
+        score += 1
+        
+    index = data.get("sprint_index", 0) + 1
+    await state.update_data(sprint_score=score, sprint_index=index)
+    
+    await send_next_sprint_question(callback.message, state, is_edit=True)
+    await callback.answer()
+
+@router.message(F.text == "📖 Чтение текстов")
+async def reading_menu_handler(message: Message, state: FSMContext) -> None:
+    uid_str = str(message.from_user.id)
+    db = load_db()
+    is_prem = is_user_premium(db.get(uid_str, {}))
+    
+    if not is_prem:
+        await message.answer(
+            "⭐ <b>Режим чтения текстов (B1, B2, C1)</b>\n\n"
+            "⚠️ Для доступа к расширенным академическим и публицистическим текстам требуется Премиум-подписка ⭐!",
+            parse_mode="HTML",
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text="⭐ Купить Премиум", callback_data="prem_hub_buy")],
+                [InlineKeyboardButton(text="🏠 Главное меню", callback_data="action_main_menu")]
+            ])
+        )
+        return
+
+    await message.answer(
+        "📖 <b>Выберите уровень для чтения текстов:</b>\n\n"
+        "• <b>B1</b> — Повседневные и социальные темы (10 текстов с вопросами)\n"
+        "• <b>B2</b> — Сложные научные, экономические и социальные статьи\n"
+        "• <b>C1</b> — Глубокие академические и философские трактаты",
+        parse_mode="HTML",
+        reply_markup=build_reading_levels_keyboard()
+    )
+
+@router.callback_query(F.data.startswith("readlvl_"))
+async def select_reading_level_callback(callback: CallbackQuery, state: FSMContext) -> None:
+    lvl = callback.data.split("_")[1]
+    uid_str = str(callback.from_user.id)
+    db = load_db()
+    if not is_user_premium(db.get(uid_str, {})):
+        await callback.answer("⚠️ Требуется Премиум-подписка ⭐!", show_alert=True)
+        return
+        
+    passages_map = {
+        "b1": READING_PASSAGES_B1,
+        "b2": READING_PASSAGES_B2,
+        "c1": READING_PASSAGES_C1
+    }
+    passages = passages_map.get(lvl, [])
+    if not passages:
+        await callback.answer("⚠️ Тексты для этого уровня пока не загружены.", show_alert=True)
+        return
+        
+    btns = []
+    for p in passages:
+        p_id = p.get("id")
+        p_title = p.get("title", f"Текст {p_id}")
+        btns.append([InlineKeyboardButton(text=f"📄 {p_title}", callback_data=f"readtext_{lvl}_{p_id}")])
+    btns.append([InlineKeyboardButton(text="🔙 К выбору уровней чтения", callback_data="back_to_read_menu")])
+    btns.append([InlineKeyboardButton(text="🏠 Главное меню", callback_data="action_main_menu")])
+    
+    await callback.message.edit_text(
+        f"📖 <b>Тексты уровня {lvl.upper()}:</b>\n\nВыберите интересующий вас текст из списка:",
+        parse_mode="HTML",
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=btns)
+    )
+    await callback.answer()
+
+@router.callback_query(F.data == "back_to_read_menu")
+async def back_to_reading_menu(callback: CallbackQuery) -> None:
+    await callback.message.edit_text(
+        "📖 <b>Выберите уровень для чтения текстов:</b>",
+        parse_mode="HTML",
+        reply_markup=build_reading_levels_keyboard()
+    )
+    await callback.answer()
+
+@router.callback_query(F.data.startswith("readtext_"))
+async def show_reading_text_callback(callback: CallbackQuery, state: FSMContext) -> None:
+    parts = callback.data.split("_")
+    lvl = parts[1]
+    p_id = parts[2]
+    try:
+        p_id = int(p_id)
+    except ValueError:
+        pass
+    
+    passages_map = {
+        "b1": READING_PASSAGES_B1,
+        "b2": READING_PASSAGES_B2,
+        "c1": READING_PASSAGES_C1
+    }
+    passages = passages_map.get(lvl, [])
+    target_passage = next((p for p in passages if p.get("id") == p_id), None)
+    
+    if not target_passage:
+        await callback.answer("⚠️ Текст не найден.", show_alert=True)
+        return
+        
+    text_content = target_passage.get("text", "")
+    title = target_passage.get("title", "")
+    questions = target_passage.get("questions", [])
+    
+    await state.update_data(current_reading_passage=target_passage, reading_q_index=0, reading_correct_count=0)
+    await state.set_state(BotStates.reading_mode_active)
+    
+    display_text = (
+        f"📚 <b>{html.quote(title)}</b>\n\n"
+        f"{html.quote(text_content)}\n\n"
+        f"🎯 <i>Текст содержит {len(questions)} вопросов для проверки понимания. Нажмите кнопку ниже, чтобы начать!</i>"
+    )
+    
+    markup = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="▶️ Начать вопросы к тексту", callback_data=f"read_start_q_{lvl}_{p_id}_0")],
+        [InlineKeyboardButton(text="🔙 К списку текстов", callback_data=f"readlvl_{lvl}")],
+        [InlineKeyboardButton(text="🏠 Главное меню", callback_data="action_main_menu")]
+    ])
+    
+    if len(display_text) > 4000:
+        display_text = display_text[:3950] + "\n\n[Текст сокращен для отображения]..."
+        
+    await callback.message.edit_text(display_text, parse_mode="HTML", reply_markup=markup)
+    await callback.answer()
+
+@router.callback_query(F.data.startswith("read_start_q_"), StateFilter(BotStates.reading_mode_active))
+async def process_reading_question(callback: CallbackQuery, state: FSMContext) -> None:
+    parts = callback.data.split("_")
+    lvl = parts[3]
+    p_id = parts[4]
+    try:
+        p_id = int(p_id)
+    except ValueError:
+        pass
+    q_index = int(parts[5])
+    
+    data = await state.get_data()
+    passage = data.get("current_reading_passage")
+    if not passage:
+        await callback.answer("⚠️ Сессия чтения сброшена.", show_alert=True)
+        return
+        
+    questions = passage.get("questions", [])
+    if q_index >= len(questions):
+        correct_count = data.get("reading_correct_count", 0)
+        await callback.message.edit_text(
+            f"🎉 <b>Поздравляем! Вы завершили чтение текста и вопросы!</b>\n\n"
+            f"🎯 Правильных ответов: <b>{correct_count} из {len(questions)}</b>",
+            parse_mode="HTML",
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text="📖 К списку текстов", callback_data=f"readlvl_{lvl}")],
+                [InlineKeyboardButton(text="🏠 Главное меню", callback_data="action_main_menu")]
+            ])
+        )
+        await callback.answer()
+        await state.clear()
+        return
+        
+    q = questions[q_index]
+    q_text = q.get("q") or q.get("question", "")
+    options = q.get("options", [])
+    correct_ans = q.get("answer") or q.get("correct", "")
+    
+    if options:
+        btns = []
+        for opt in options:
+            is_corr = "1" if opt == correct_ans else "0"
+            btns.append([InlineKeyboardButton(text=opt, callback_data=f"readans_{lvl}_{p_id}_{q_index}_{is_corr}")])
+        btns.append([InlineKeyboardButton(text="🏠 Главное меню", callback_data="action_main_menu")])
+        
+        await callback.message.edit_text(
+            f"❓ <b>Вопрос {q_index + 1} из {len(questions)}</b>:\n\n{html.quote(q_text)}",
+            parse_mode="HTML",
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=btns)
+        )
+    else:
+        sample_ans = q.get("sample", correct_ans)
+        await state.update_data(current_open_q_index=q_index, current_lvl=lvl, current_p_id=p_id)
+        await callback.message.edit_text(
+            f"✍️ <b>Вопрос {q_index + 1} из {len(questions)}</b> (Открытый вопрос):\n\n"
+            f"{html.quote(q_text)}\n\n"
+            f"💡 <i>Напишите ваш ответ в чат следующим сообщением. Образец ответа: <code>{html.quote(str(sample_ans))}</code></i>",
+            parse_mode="HTML",
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="🏠 Главное меню", callback_data="action_main_menu")]])
+        )
+    await callback.answer()
+
+@router.callback_query(F.data.startswith("readans_"), StateFilter(BotStates.reading_mode_active))
+async def evaluate_reading_choice_answer(callback: CallbackQuery, state: FSMContext) -> None:
+    parts = callback.data.split("_")
+    lvl = parts[1]
+    p_id = parts[2]
+    q_index = int(parts[3])
+    is_corr = parts[4] == "1"
+    
+    data = await state.get_data()
+    correct_count = data.get("reading_correct_count", 0)
+    if is_corr:
+        correct_count += 1
+        await state.update_data(reading_correct_count=correct_count)
+        
+    next_index = q_index + 1
+    markup = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="➡️ Следующий вопрос", callback_data=f"read_start_q_{lvl}_{p_id}_{next_index}")],
+        [InlineKeyboardButton(text="🏠 Главное меню", callback_data="action_main_menu")]
+    ])
+    
+    res_text = "✅ <b>Верно!</b>" if is_corr else "❌ <b>Неправильно.</b>"
+    await callback.message.edit_text(f"{res_text}", parse_mode="HTML", reply_markup=markup)
+    await callback.answer()
+
+@router.message(StateFilter(BotStates.reading_mode_active), F.text)
+async def evaluate_reading_open_answer(message: Message, state: FSMContext) -> None:
+    data = await state.get_data()
+    q_index = data.get("current_open_q_index")
+    lvl = data.get("current_lvl")
+    p_id = data.get("current_p_id")
+    passage = data.get("current_reading_passage")
+    
+    if q_index is None or not passage:
+        return
+        
+    questions = passage.get("questions", [])
+    q = questions[q_index]
+    sample = q.get("sample") or q.get("answer") or q.get("correct", "")
+    
+    correct_count = data.get("reading_correct_count", 0) + 1
+    await state.update_data(reading_correct_count=correct_count)
+    
+    next_index = q_index + 1
+    markup = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="➡️ Следующий вопрос", callback_data=f"read_start_q_{lvl}_{p_id}_{next_index}")],
+        [InlineKeyboardButton(text="🏠 Главное меню", callback_data="action_main_menu")]
+    ])
+    
+    await message.answer(
+        f"✍️ <b>Ваш ответ принят!</b>\n\n"
+        f"💡 Образец правильного ответа:\n<i>{html.quote(str(sample))}</i>",
+        parse_mode="HTML",
+        reply_markup=markup
+    )
 
 @router.message(F.text.in_(["⭐ Купить Премиум *", "⭐ Купить Премиум"]))
 async def premium_hub_handler(message: Message) -> None:
@@ -392,7 +806,7 @@ async def callback_prem_buy(callback: CallbackQuery) -> None:
     try:
         await callback.message.answer_invoice(
             title="⭐ Премиум-подписка",
-            description="Разблокирует уровни B1, B2, C1, премиум-тренажеры и эксклюзивные функции на 30 дней!",
+            description="Разблокирует уровни B1, B2, C1, тексты для чтения, спринты и эксклюзивные функции на 30 дней!",
             prices=prices,
             payload="premium_sub_payload",
             currency="XTR",
@@ -489,7 +903,6 @@ async def claim_referral_callback(callback: CallbackQuery) -> None:
         
         await callback.answer(f"🎉 Успешно! Вам добавлено +{days_to_add} дн. Премиума!", show_alert=True)
         
-        # Обновляем экран вывода
         invited_count = len(user_data.get("invited_users", []))
         tier = user_data.get("referral_tier", 0)
         text = (
@@ -511,10 +924,6 @@ async def claim_referral_callback(callback: CallbackQuery) -> None:
             pass
     else:
         await callback.answer("⚠️ Все доступные награды уже получены.", show_alert=True)
-
-# =============================================================================
-# ПРОФИЛЬ И СТАТИСТИКА
-# =============================================================================
 
 @router.message(F.text == "👤 Профиль и Статистика")
 async def handle_profile_request(message: Message) -> None:
@@ -545,10 +954,6 @@ async def handle_profile_request(message: Message) -> None:
         f"📅 Дата регистрации: {info.get('joined_date', 'Н/Д')}",
         parse_mode="HTML"
     )
-
-# =============================================================================
-# ОСТАЛЬНОЙ ФУНКЦИОНАЛ (Слова, Тесты, Грамматика, Игры, ДЗ)
-# =============================================================================
 
 @router.message(F.text == "📖 Справочник падежей")
 async def handle_grammar_menu(message: Message) -> None:
@@ -736,7 +1141,7 @@ async def trainer_menu_message(message: Message) -> None:
         [InlineKeyboardButton(text="⭐ Премиум-тренажер *", callback_data="trainer_premium_block")],
         [InlineKeyboardButton(text="🏠 Главное меню", callback_data="action_main_menu")]
     ])
-    await message.answer("⚡ <b>Тренажер предложений:</b>", parse_mode="HTML", reply_markup=keyboard)
+    await message.answer("⚡ <b>Тренер предложений:</b>", parse_mode="HTML", reply_markup=keyboard)
 
 @router.callback_query(F.data.in_({"trainer_free_block", "trainer_premium_block"}))
 async def trainer_content_handler(callback: CallbackQuery) -> None:
@@ -834,10 +1239,6 @@ async def change_level(callback: CallbackQuery, state: FSMContext) -> None:
     await callback.message.edit_text("🔤 Выбери уровень:", parse_mode="HTML", reply_markup=build_levels_selection_keyboard())
     await state.set_state(BotStates.selecting_vocabulary_level)
     await callback.answer()
-
-# =============================================================================
-# РЕЖИМ ТЕСТОВ (4-5 ВАРИАНТОВ)
-# =============================================================================
 
 @router.message(F.text == "🎯 Режим тестов")
 async def entry_quiz(message: Message, state: FSMContext) -> None:
@@ -938,10 +1339,6 @@ async def next_quiz_question(callback: CallbackQuery, state: FSMContext) -> None
     )
     await callback.answer()
 
-# =============================================================================
-# НАСТРОЙКИ, ОПЛАТА И АДМИНКА
-# =============================================================================
-
 @router.message(F.text == "⚙️ Настройки")
 async def settings_menu(message: Message) -> None:
     markup = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="🏠 Главное меню", callback_data="action_main_menu")]])
@@ -956,7 +1353,7 @@ async def successful_payment(message: Message) -> None:
     uid_str = str(message.from_user.id)
     db = load_db()
     if uid_str in db:
-        add_premium_days(db[uid_str], 30) # Покупка дает 30 дней
+        add_premium_days(db[uid_str], 30)
         save_db(db)
         
     is_admin = (message.from_user.id == ADMIN_TELEGRAM_ID)
@@ -980,10 +1377,6 @@ async def admin_panel_handler(message: Message) -> None:
         f"⭐ С Премиумом: <code>{premium_count}</code>",
         parse_mode="HTML"
     )
-
-# =============================================================================
-# ТОЧКА ВХОДА
-# =============================================================================
 
 async def main() -> None:
     logger.info("Initializing bot instance...")
