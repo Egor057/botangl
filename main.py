@@ -7,15 +7,13 @@ import random
 import shutil
 from datetime import datetime
 from typing import Dict, List, Any, Optional, Union
+import logging
 
-# ==============================================================================
-# SECTION 0: SYSTEM LOGGING SETUP (CRITICAL: MUST BE AT THE VERY TOP)
-# ==============================================================================
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s | %(levelname)-8s | %(name)s:%(funcName)s:%(lineno)d - %(message)s",
-    stream=sys.stdout
-)
+import asyncio
+import logging
+import sys
+
+logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 logger = logging.getLogger("LanguageBotCore")
 
 
@@ -92,7 +90,7 @@ router = Router()
 # ==============================================================================
 # SECTION 3: ROBUST DATABASE MANAGEMENT SYSTEM
 # ==============================================================================
-BOT_TOKEN = "9084719584:AAGuBzbaD9qtOEoR4Hw4Ok_eL9Miic35Nb4"
+BOT_TOKEN = "9084719584:AAE4LeWAMwUm1ynXJeMlKxZxaApC65UhkDg"
 ADMIN_TELEGRAM_ID = 9136166835
 
 DB_FILENAME = "users_database.json"
@@ -303,7 +301,7 @@ async def handle_start_command(message: Message, state: FSMContext) -> None:
     await message.answer(
         welcome_message,
         parse_mode="Markdown",
-        reply_markup=build_main_menu_keyboard(is_administrator=is_admin)
+        reply_markup=build_main_menu_keyboard(is_admin)
     )
 
 @router.message(F.text == "👤 Профиль и Статистика")
