@@ -619,3 +619,12 @@ def get_task_by_key(level_code: str, task_key: str):
     else:
         pool = HOMEWORK_A1_TASKS
     return pool.get(task_key)
+
+
+    HOMEWORK_DATABASE = {
+    **HOMEWORK_A1_TASKS, 
+    **HOMEWORK_A2_TASKS, 
+    **HOMEWORK_B1_TASKS, 
+    **HOMEWORK_B2_TASKS, 
+    **HOMEWORK_C1_TASKS
+}

@@ -122,3 +122,6 @@ FAIL_SCENARIOS = {
 VICTORY_SCENARIOS = {
     "button": "🔄 Выбрать другой чат"
 }
+
+
+CHAT_SIM_MODULE_DATA = CHAT_SCENARIOS

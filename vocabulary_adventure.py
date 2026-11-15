@@ -238,3 +238,5 @@ ADVENTURE_SCENARIOS = {
         "buttons": [{"text": "🔄 Попробовать снова", "next": "start"}]
     }
 }
+
+ADVENTURE_MODULE_DATA = ADVENTURE_SCENARIOS
