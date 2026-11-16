@@ -89,6 +89,29 @@ try:
 except ImportError as e:
     logger.warning(f"Предупреждение при импорте модуля: {e}")
 
+
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
+import os
+
+# Простейший HTTP-сервер для удержания сервера бодрствующим
+class SimpleHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"Bot is alive!")
+    def log_message(self, format, *args):
+        pass # Отключаем лишний спам в логах
+
+def run_server():
+    port = int(os.environ.get("PORT", 10000))
+    server = HTTPServer(("0.0.0.0", port), SimpleHandler)
+    server.serve_forever()
+
+
+ 
+# Запускаем веб-сервер в отдельном потоке, чтобы он не мешал боту
+threading.Thread(target=run_server, daemon=True).start()
 def get_main_keyboard():
     return ReplyKeyboardMarkup(
         keyboard=[
