@@ -1,187 +1,336 @@
-import random
-
-# ==========================================
-# 1. МАСШТАБНЫЙ СЛОВАРЬ TRAVEL (База слов)
-# ==========================================
 TRAVEL_WORDS = [
-    # Аэропорт и самолет
-    {"word": "Luggage / Baggage", "trans": "[ˈlʌɡɪdʒ]", "translation": "Багаж, чемодан"},
-    {"word": "Boarding pass", "trans": "[ˈbɔːrdɪŋ pæs]", "translation": "Посадочный талон"},
-    {"word": "Customs", "trans": "[ˈkʌstəmz]", "translation": "Таможня"},
-    {"word": "Delay", "trans": "[dɪˈleɪ]", "translation": "Задержка рейса"},
-    {"word": "Gate", "trans": "[ɡeɪt]", "translation": "Выход на посадку"},
-    {"word": "Passport control", "trans": "[ˈpæspɔːrt kənˈtroʊl]", "translation": "Паспортный контроль"},
-    {"word": "Security check", "trans": "[sɪˈkjʊrəti tʃek]", "translation": "Досмотр безопасности"},
-    {"word": "Overweight baggage", "trans": "[ˌoʊvərweɪt ˈbæɡɪdʒ]", "translation": "Перевес багажа"},
-    {"word": "Connecting flight", "trans": "[kəˈnektɪŋ flaɪt]", "translation": "Сстыковочный рейс"},
-    {"word": "Direct flight", "trans": "[daɪˈrekt flaɪt]", "translation": "Прямой рейс"},
-    
-    # Отель и проживание
-    {"word": "Reservation", "trans": "[ˌrezərˈveɪʃn]", "translation": "Бронирование"},
-    {"word": "Air conditioning", "trans": "[ˈer kəndɪʃənɪŋ]", "translation": "Кондиционер"},
-    {"word": "Reception / Front desk", "trans": "[rɪˈsepʃn]", "translation": "Ресепшн, стойка регистрации"},
-    {"word": "Single / Double room", "trans": "[ˈsɪŋɡl / ˈdʌbl ruːm]", "translation": "Одноместный / двухместный номер"},
-    {"word": "Check-in / Check-out", "trans": "[tʃek ɪn / tʃek aʊt]", "translation": "Заселение / выселение"},
-    {"word": "Breakfast included", "trans": "[ˈbrekfəst ɪnˈkluːdɪd]", "translation": "Завтрак включен"},
-    {"word": "Wi-Fi password", "trans": "[ˈwaɪfaɪ ˈpɑːswərd]", "translation": "Пароль от вай-фая"},
-    {"word": "Elevator / Lift", "trans": "[ˈeləveɪtər / lɪft]", "translation": "Лифт"},
-    {"word": "Key card", "trans": "[kiː kɑːrd]", "translation": "Карта-ключ от номера"},
-    {"word": "Room service", "trans": "[ruːm ˈsɜːrvɪs]", "translation": "Обслуживание номеров"},
-
-    # Город и транспорт
-    {"word": "Subway / Underground", "trans": "[ˈsʌbweɪ]", "translation": "Метро"},
-    {"word": "Railway station", "trans": "[ˈreɪlweɪ ˈsteɪʃn]", "translation": "Железнодорожный вокзал"},
-    {"word": "Ticket machine", "trans": "[ˈtɪkɪt məˈʃiːn]", "translation": "Билетный автомат"},
-    {"word": "Single ticket", "trans": "[ˈsɪŋɡl ˈtɪkɪt]", "translation": "Билет в один конец"},
-    {"word": "Return ticket", "trans": "[rɪˈtɜːrn ˈtɪkɪt]", "translation": "Билет туда и обратно"},
-    {"word": "Bus stop", "trans": "[bʌs stɑːp]", "translation": "Автобусная остановка"},
-    {"word": "Map", "trans": "[mæp]", "translation": "Карта"},
-    {"word": "Directions", "trans": "[dəˈrekʃnz]", "translation": "Направления / маршрут"},
-    {"word": "Car rental", "trans": "[kɑːr ˈrentl]", "translation": "Аренда автомобилей"},
-    {"word": "Gas station", "trans": "[ɡæs ˈsteɪʃn]", "translation": "Заправка"},
-
-    # Ресторан и еда
-    {"word": "Menu", "trans": "[ˈmenjuː]", "translation": "Меню"},
-    {"word": "Check / Bill", "trans": "[tʃek / bɪl]", "translation": "Счет"},
-    {"word": "Waiter / Waitress", "trans": "[ˈweɪtər / ˈweɪtrəs]", "translation": "Официант / официантка"},
-    {"word": "Tip", "trans": "[tɪp]", "translation": "Чаевые"},
-    {"word": "Pay by card", "trans": "[peɪ baɪ kɑːrd]", "translation": "Платить картой"},
-    {"word": "Cash", "trans": "[kæʃ]", "translation": "Наличные"},
-    {"word": "Starter", "trans": "[ˈstɑːrtər]", "translation": "Закуска"},
-    {"word": "Main course", "trans": "[meɪn kɔːrs]", "translation": "Основное блюдо"},
-    {"word": "Allergy", "trans": "[ˈælərdʒi]", "translation": "Аллергия"},
-    {"word": "Tap water", "trans": "[tæp ˈwɔːtər]", "translation": "Вода из-под крана (бесплатная)"},
-
-    # Экстренные ситуации
-    {"word": "Emergency", "trans": "[ɪˈmɜːrdʒənsi]", "translation": "Чрезвычайная ситуация"},
-    {"word": "Police station", "trans": "[pəˈliːs ˈsteɪʃn]", "translation": "Полицейский участок"},
-    {"word": "Pharmacy", "trans": "[ˈfɑːrməsi]", "translation": "Аптека"},
-    {"word": "Hospital", "trans": "[ˈhɑːspɪtl]", "translation": "Больница"},
-    {"word": "Stolen", "trans": "[ˈstoʊlən]", "translation": "Украденный"},
-    {"word": "Help", "trans": "[help]", "translation": "Помощь"},
-    {"word": "Lost", "trans": "[lɔːst]", "translation": "Потерянный / заблудившийся"}
+    ("Passport", "Please show your passport and boarding pass.", "Пожалуйста, покажите ваш паспорт и посадочный талон."),
+    ("Luggage", "Be careful not to leave your luggage unattended.", "Будьте осторожны, не оставляйте багаж без присмотра."),
+    ("Boarding pass", "Your boarding pass indicates your seat number.", "В вашем посадочном талоне указан номер места."),
+    ("Customs", "Declare all taxable items at customs.", "Задекларируйте все подлежащие налогообложению товары на таможне."),
+    ("Gate", "Flight 405 is now boarding at gate B22.", "Рейс 405 посадка на который началась, у выхода B22."),
+    ("Delay", "We apologize for the delay due to bad weather.", "Приносим извинения за задержку из-за плохой погоды."),
+    ("Cancellation", "The cancellation of the flight caused a lot of stress.", "Отмена рейса вызвала много стресса."),
+    ("Reservation", "I have a table reservation for two under the name Smith.", "У меня бронь столика на двоих на имя Смит."),
+    ("Reception", "Please leave your room key at the reception desk.", "Пожалуйста, оставляйте ключ от номера на стойке регистрации."),
+    ("Check-in", "Check-in begins two hours before international flights.", "Регистрация начинается за два часа до международных рейсов."),
+    ("Checkout", "Checkout time is strictly at 11 AM.", "Время выселения строго в 11 часов утра."),
+    ("Single room", "I would like to book a single room for three nights.", "Я хотел бы забронировать одноместный номер на три ночи."),
+    ("Double room", "Do you have any double rooms with a sea view?", "Есть ли у вас двухместные номера с видом на море?"),
+    ("Keycard", "Use your keycard to open the elevator doors.", "Используйте ключ-карту, чтобы открыть двери лифта."),
+    ("Elevator", "The elevator is located at the end of the hallway.", "Лифт находится в конце коридора."),
+    ("Lobby", "Let's meet in the hotel lobby in ten minutes.", "Давайте встретимся в холле отеля через десять минут."),
+    ("Airfare", "Airfare prices tend to rise during summer holidays.", "Цены на авиабилеты имеют тенденцию расти во время летних каникул."),
+    ("Airline", "Which airline are you flying with to New York?", "Какой авиакомпанией вы летите в Нью-Йорк?"),
+    ("Layover", "We have a three-hour layover in Frankfurt.", "У нас трехчасовая пересадка во Франкфурте."),
+    ("Direct flight", "A direct flight is much more convenient with kids.", "Прямой рейс гораздо удобнее с детьми."),
+    ("Round trip", "How much is a round trip ticket to Paris?", "Сколько стоит билет туда и обратно в Париж?"),
+    ("One way", "I need a one-way ticket to London.", "Мне нужен билет в один конец до Лондона."),
+    ("Departure", "Check the departure board for any gate changes.", "Проверьте табло отправления на предмет изменения выходов."),
+    ("Arrival", "Estimated arrival time is 6:45 PM.", "Ориентировочное время прибытия — 18:45."),
+    ("Terminal", "International flights depart from Terminal 2.", "Международные рейсы отправляются из Терминала 2."),
+    ("Security check", "Take off your shoes and belt before the security check.", "Снимите обувь и ремень перед досмотром."),
+    ("Metal detector", "Walk through the metal detector, please.", "Пройдите через металлоискатель, пожалуйста."),
+    ("X-ray machine", "Put your laptop in a separate tray for the X-ray machine.", "Положите ноутбук в отдельный лоток для рентген-аппарата."),
+    ("Duty-free shop", "You can buy souvenirs and perfumes at the duty-free shop.", "Вы можете купить сувениры и парфюмерию в магазине беспошлинной торговли."),
+    ("Baggage claim", "Collect your bags at baggage claim area number 4.", "Заберите свои сумки в зоне выдачи багажа номер 4."),
+    ("Carousels", "The baggage carousels are just past customs.", "Багажные карусели находятся сразу после таможни."),
+    ("Overweight luggage", "There is a hefty fee for overweight luggage.", "Взимается крупная плата за сверхнормативный багаж."),
+    ("Hand luggage", "Only one piece of hand luggage is allowed in the cabin.", "В салон разрешается проносить только одно место ручной клади."),
+    ("Seatbelt", "Fasten your seatbelt during takeoff and landing.", "Застегните ремень безопасности во время взлета и посадки."),
+    ("Tray table", "Stow your tray table before landing.", "Уберите откидной столик перед посадкой."),
+    ("Overhead bin", "Place your backpack in the overhead bin.", "Положите рюкзак на верхнюю полку для багажа."),
+    ("Flight attendant", "Ask a flight attendant for a blanket if you are cold.", "Попросите у бортпроводника плед, если вам холодно."),
+    ("Captain", "The captain announced we will be landing shortly.", "Капитан объявил, что мы скоро приземлимся."),
+    ("Turbulence", "We are experiencing some mild turbulence.", "Мы испытываем небольшую турбулентность."),
+    ("Emergency exit", "Read the safety instructions near the emergency exit.", "Прочтите инструкции по безопасности у аварийного выхода."),
+    ("Life vest", "Your life vest is located under your seat.", "Ваш спасательный жилет находится под сиденьем."),
+    ("Oxygen mask", "In case of cabin depressurization, oxygen masks will drop.", "В случае разгерметизации салона выпадут кислородные маски."),
+    ("Immigration officer", "Show your visa to the immigration officer.", "Покажите визу офицеру миграционной службы."),
+    ("Visa", "Do citizens of your country need a visa to enter?", "Нужна ли гражданам вашей страны виза для въезда?"),
+    ("Tourist", "I am visiting this country as a tourist.", "Я приезжаю в эту страну как турист."),
+    ("Business trip", "This is strictly a business trip.", "Это исключительно деловая поездка."),
+    ("Hostel", "We stayed in a cozy backpacker hostel in downtown.", "Мы останавливались в уютном хостеле для бэкпекеров в центре."),
+    ("Resort", "They spent their honeymoon at a tropical beach resort.", "Они провели медовый месяц на тропическом пляжном курорте."),
+    ("Motel", "We stopped at a roadside motel for the night.", "Мы остановились на ночлег в придорожном мотеле."),
+    ("Inquiry", "Go to the information desk for any inquiries.", "Обратитесь на справочную стойку по любым вопросам."),
+    ("Sightseeing", "We spent the afternoon sightseeing in the old town.", "Мы провели последеньое время за осмотром достопримечательностей в старом городе."),
+    ("Itinerary", "Our travel itinerary includes visits to three museums.", "Наш маршрут поездки включает посещение трех музеев."),
+    ("Souvenir", "I bought some handmade pottery as a souvenir.", "Я купил керамику ручной работы в качестве сувенира."),
+    ("Guidebook", "The guidebook recommends visiting the local night market.", "Путеводитель рекомендует посетить местный ночной рынок."),
+    ("Map", "Let's check the map to find the nearest subway station.", "Давайте проверим карту, чтобы найти ближайшую станцию метро."),
+    ("Currency", "Where can I exchange my currency into euros?", "Где я могу обменять валюту на евро?"),
+    ("Exchange rate", "The exchange rate at the airport is usually quite low.", "Курс обмена в аэропорту обычно довольно низкий."),
+    ("Cash", "I always carry some local cash for small purchases.", "Я всегда ношу с собой немного местных наличных для мелких покупок."),
+    ("Credit card", "Do you accept credit cards or only cash?", "Принимаете ли вы кредитные карты или только наличные?"),
+    ("ATM", "Is there an ATM nearby where I can withdraw money?", "Есть ли поблизости банкомат, где я могу снять деньги?"),
+    ("Receipt", "Please keep your receipt for tax refund purposes.", "Пожалуйста, сохраните чек для возврата налога."),
+    ("Tip", "It is customary to leave a 10% tip in restaurants.", "В ресторанах принято оставлять 10% чаевых."),
+    ("Menu", "Could you bring us the menu in English, please?", "Не могли бы вы принести нам меню на английском, пожалуйста?"),
+    ("Waiter", "Excuse me, waiter, we are ready to order.", "Извините, официант, мы готовы сделать заказ."),
+    ("Bill", "Could we have the bill, please?", "Можно нам счет, пожалуйста?"),
+    ("Reservation", "We booked a table under the name Johnson.", "Мы забронировали столик на имя Джонсон."),
+    ("Appetizer", "We ordered garlic bread as an appetizer.", "Мы заказали чесночный хлеб в качестве закуски."),
+    ("Main course", "For the main course, I will have the grilled salmon.", "На второе я возьму запеченный лосось."),
+    ("Dessert", "Do you have any traditional local desserts?", "Есть ли у вас традиционные местные десерты?"),
+    ("Vegetarian", "Are there any vegetarian options on the menu?", "Есть ли в меню вегетарианские блюда?"),
+    ("Allergy", "I have a severe peanut allergy.", "У меня сильная аллергия на арахис."),
+    ("Tap water", "Is the tap water safe to drink here?", "Безопасно ли здесь пить воду из-под крана?"),
+    ("Bottle", "I would like a bottle of still mineral water.", "Я бы хотел бутылку негазированной минеральной воды."),
+    ("Subway", "The subway is the fastest way to get across the city.", "Метро — самый быстрый способ пересечь город."),
+    ("Bus stop", "Where is the bus stop for the city center?", "Где автобусная остановка до центра города?"),
+    ("Train station", "We need to take a taxi to the central train station.", "Нам нужно взять такси до центрального вокзала."),
+    ("Platform", "Our train departs from platform number 3.", "Наш поезд отправляется с платформы номер 3."),
+    ("Ticket office", "You can buy tickets at the ticket office or online.", "Вы можете купить билеты в кассе или онлайн."),
+    ("Schedule", "Let's check the train schedule for tomorrow morning.", "Давайте проверим расписание поездов на завтрашнее утро."),
+    ("Delay", "The train is experiencing a 15-minute delay.", "Поезд задерживается на 15 минут."),
+    ("Platform", "Please stand behind the yellow line on the platform.", "Пожалуйста, стойте за желтой линией на платформе."),
+    ("Carriage", "My seat is in carriage B, row 12.", "Мое место в вагоне B, ряд 12."),
+    ("Luggage rack", "Put your suitcase on the overhead luggage rack.", "Положите чемодан на багажную полку наверху."),
+    ("Taxi stand", "There is a long queue at the taxi stand.", "У стопки такси длинная очередь."),
+    ("Fare", "How much is the taxi fare to the museum?", "Сколько стоит проезд на такси до музея?"),
+    ("Meter", "Please make sure the driver turns on the meter.", "Пожалуйста, убедитесь, что водитель включил счетчик."),
+    ("Traffic jam", "We got stuck in a huge traffic jam during rush hour.", "Мы застряли в огромной пробки в час пик."),
+    ("Rental car", "We picked up our rental car at the airport.", "Мы забрали арендованную машину в аэропорту."),
+    ("Driver's license", "You need a valid international driver's license to rent a car.", "Для аренды машины нужны международные водительские права."),
+    ("Gas station", "We need to stop at a gas station before returning the car.", "Нам нужно заехать на заправку перед возвратом машины."),
+    ("Parking lot", "Is there a secure parking lot near the hotel?", "Есть ли рядом с отелем охраняемая парковка?"),
+    ("Speed limit", "The speed limit on this highway is 120 km/h.", "Ограничение скорости на этой автомагистрали составляет 120 км/ч."),
+    ("Highway", "We drove along the scenic coastal highway.", "Мы ехали по живописной прибрежной автомагистрали."),
+    ("Bridge", "The bridge offers a wonderful view of the harbor.", "С моста открывается прекрасный вид на гавань."),
+    ("Tunnel", "The train went through a long dark mountain tunnel.", "Поезд прошел через длинный темный горный тоннель."),
+    ("Island", "We took a ferry to visit the nearby island.", "Мы сели на паром, чтобы посетить близлежащий остров."),
+    ("Ferry", "The ferry ride takes about forty minutes.", "Поездка на пароме занимает около сорока минут."),
+    ("Port", "Cruise ships dock at the main commercial port.", "Круизные лайнеры швартуются в главном торговом порту."),
+    ("Cruise", "They booked a Mediterranean cruise for their vacation.", "Они забронировали средиземноморский круиз для отпуска."),
+    ("Beach", "We spent the whole day relaxing on the sandy beach.", "Мы провели весь день, расслабляясь на песчаном пляже."),
+    ("Passport control", "Have your passport ready for passport control.", "Подготовьте паспорт для паспортного контроля."),
+    ("Boarding card", "Keep your boarding card until you exit the arrival hall.", "Сохраняйте посадочный талон до выхода из зала прилёта."),
+    ("Departure lounge", "Passengers can relax in the departure lounge before boarding.", "Пассажиры могут отдохнуть в зале вылета перед посадкой."),
+    ("Connecting flight", "We have to rush for our connecting flight in Doha.", "Нам нужно спешить на стыковочный рейс в Дохе."),
+    ("Aisle seat", "I prefer an aisle seat on long-haul flights.", "Я предпочитаю место у прохода на дальнемагистральных рейсах."),
+    ("Window seat", "Children usually love sitting by the window seat.", "Дети обычно любят сидеть у окна."),
+    ("Emergency exit row", "Seats in the emergency exit row offer extra legroom.", "Места у аварийного выхода предлагают больше пространства для ног."),
+    ("Jet lag", "It took me two days to recover from jet lag.", "Мне потребовалось два дня, чтобы оправиться от смены часовых поясов."),
+    ("Lost and found", "If you lose your bag, report it to the lost and found office.", "Если вы потеряете сумку, сообщите в бюро находок."),
+    ("Information desk", "Ask at the information desk for city tour brochures.", "Спросите на информационной стойке брошюры по экскурсиям по городу."),
+    ("Shuttle bus", "A free shuttle bus runs between the terminal and the hotel.", "Между терминалом и отелем курсирует бесплатный автобус-шаттл."),
+    ("Car rental", "We booked a car rental online in advance.", "Мы заблаговременно забронировали аренду автомобиля онлайн."),
+    ("Insurance", "Always check if travel insurance covers medical expenses.", "Всегда проверяйте, покрывает ли туристическая страховка медицинские расходы."),
+    ("Embassy", "If you lose your documents, visit your country's embassy.", "Если вы потеряете документы, посетите посольство своей страны."),
+    ("Consulate", "The consulate helped us issue an emergency passport.", "Консульство помогло нам выдать временный паспорт."),
+    ("Local currency", "It is wise to exchange a small amount of local currency.", "Разумно обменять небольшую сумму местной валюты."),
+    ("Baggage allowance", "Check your airline's baggage allowance before packing.", "Проверьте норму провоза багажа вашей авиакомпании перед сбором вещей."),
+    ("Fragile", "Mark your suitcase as fragile if it contains glass.", "Пометьте чемодан как хрупкий, если в нем есть стекло."),
+    ("Customs declaration", "Fill out the customs declaration form before landing.", "Заполните бланк таможенной декларации перед посадкой."),
+    ("Prohibited items", "Aerosols and sharp objects are prohibited items in cabins.", "Аэрозоли и острые предметы запрещены в салоне самолета."),
+    ("Departure time", "The departure time is scheduled for 8:30 AM.", "Время отправления запланировано на 8:30 утра."),
+    ("Arrival time", "Our arrival time is expected at noon.", "Наше время прибытия ожидается в полдень."),
+    ("Boarding time", "Boarding time starts thirty minutes before departure.", "Время посадки начинается за тридцать минут до отправления."),
+    ("Gate number", "Check the monitors frequently for any gate number changes.", "Часто проверяйте мониторы на предмет изменения номера выхода."),
+    ("Flight number", "Keep your flight number handy when checking in.", "Держите номер рейса под рукой при регистрации."),
+    ("Booking reference", "Your booking reference is a six-character code.", "Ваш номер бронирования — это код из шести символов."),
+    ("E-ticket", "Show your e-ticket barcode at the scanner.", "Покажите штрих-код электронного билета у сканера."),
+    ("Passport expiry", "Ensure your passport expiry date is at least six months away.", "Убедитесь, что срок действия паспорта истекает не раньше, чем через шесть месяцев."),
+    ("Travel agency", "We booked our vacation package through a travel agency.", "Мы забронировали наш турпакет через туристическое агентство."),
+    ("Package tour", "A package tour includes flights, hotel, and transfers.", "Пакетный тур включает перелет, отель и трансферы."),
+    ("Sightseeing tour", "We joined a guided sightseeing tour of the historic center.", "Мы присоединились к экскурсии с гидом по историческому центру."),
+    ("Tour guide", "Our tour guide explained the history of the castle.", "Наш гид объяснил историю замка."),
+    ("Audio guide", "You can rent an audio guide at the museum entrance.", "Вы можете арендовать аудиогид у входа в музей."),
+    ("Exhibition", "The museum is hosting an exhibition of modern art.", "В музее проходит выставка современного искусства."),
+    ("Gallery", "We spent hours exploring the art gallery.", "Мы провели часы, исследуя художественную галерею."),
+    ("Monument", "The ancient monument is a popular tourist attraction.", "Древний памятник является популярной достопримечательностью."),
+    ("Cathedral", "The gothic cathedral towers over the town square.", "Готический собор возвышается над городской площадью."),
+    ("Castle", "The medieval castle stands on a hill overlooking the river.", "Средневековый замок стоит на холме с видом на реку."),
+    ("Square", "Street performers were entertaining crowds in the main square.", "Уличные артисты развлекали толпу на главной площади."),
+    ("Fountain", "Tourists tossed coins into the fountain for good luck.", "Туристы бросали монеты в фонтан на удачу."),
+    ("Park", "We enjoyed a peaceful picnic in the city park.", "Мы наслаждались мирным пикником в городском парке."),
+    ("Zoo", "Children love visiting the city zoo to see pandas.", "Дети любят посещать городской зоопарк, чтобы увидеть панд."),
+    ("Aquarium", "The giant aquarium features sharks and coral reefs.", "В гигантском аквариуме представлены акулы и коралловые рифы."),
+    ("Amusement park", "We spent the whole day riding roller coasters at the amusement park.", "Мы провели весь день, кататься на американских горках в парке развлечений."),
+    ("Theater", "We bought tickets for a musical at the West End theater.", "Мы купили билеты на мюзикл в театре Вест-Энда."),
+    ("Opera", "An evening at the opera requires formal attire.", "Вечер в оперном театре требует официальной одежды."),
+    ("Concert", "Thousands of fans attended the open-air summer concert.", "Тысячи фанатов посетили летний концерт под открытым небом."),
+    ("Stadium", "The football match drew a crowd of fifty thousand fans.", "Футбольный матч собрал толпу в пятьдесят тысяч фанатов."),
+    ("Souvenir shop", "We stopped at a souvenir shop to buy postcards.", "Мы зашли в сувенирный магазин, чтобы купить открытки."),
+    ("Postcard", "I wrote a postcard to my parents from Rome.", "Я написал открытку родителям из Рима."),
+    ("Aisle", "I prefer an aisle seat so I can stretch my legs.", "Я предпочитаю место у прохода, чтобы вытянуть ноги."),
+    ("Boarding", "Boarding for flight BA123 will begin shortly.", "Посадка на рейс BA123 начнется в ближайшее время."),
+    ("Booking", "Keep your booking confirmation handy.", "Держите подтверждение бронирования под рукой."),
+    ("Brochure", "You can pick up a city tour brochure at the desk.", "Вы можете взять брошюрку по экскурсиям на стойке."),
+    ("Cab", "Let's hail a cab outside the train station.", "Давайте поймаем такси у вокзала."),
+    ("Campground", "We pitched our tent at a scenic campground.", "Мы поставили палатку в живописном кемпинге."),
+    ("Cancel", "You can cancel your hotel reservation free of charge.", "Вы можете отменить бронь отеля бесплатно."),
+    ("Carrier", "Check your airline carrier's baggage restrictions.", "Проверьте ограничения по багажу вашей авиакомпании."),
+    ("Charter", "They booked a private charter flight to the island.", "Они забронировали частный чартерный рейс на остров."),
+    ("Check-out", "Checkout is at noon, but we can store our bags.", "Выезд в полдень, но мы можем оставить сумки на хранение."),
+    ("Coach", "We took an overnight coach to save money on a hotel.", "Мы поехали на междугороднем автобусе, чтобы сэкономить на отеле."),
+    ("Compass", "A compass can be useful when hiking in the mountains.", "Компас может пригодиться при походе в горы."),
+    ("Connection", "Our connection in Istanbul is only forty minutes.", "Наша пересадка в Стамбуле длится всего сорок минут."),
+    ("Consulate", "Contact the consulate if you lose your identification.", "Свяжитесь с консульством, если потеряете удостоверение личности."),
+    ("Continental breakfast", "Continental breakfast is included in the room rate.", "Континентальный завтрак включен в стоимость номера."),
+    ("Cruise ship", "The massive cruise ship docked at the harbor early morning.", "Огромный круизный лайнер пришвартовался в гавани ранним утром."),
+    ("Customs officer", "The customs officer asked to inspect my backpack.", "Таможенник попросил осмотреть мой рюкзак."),
+    ("Departure board", "Look at the departure board for gate updates.", "Посмотрите на табло отправления для уточнения выхода."),
+    ("Destination", "We finally reached our dream destination after a long flight.", "Мы наконец добрались до пункта назначения мечты после долговго перелета."),
+    ("Dinghy", "We used a small dinghy to reach the secluded beach.", "Мы использовали небольшую лодку, чтобы добраться до уединенного пляжа."),
+    ("Directions", "Could you give us directions to the museum?", "Не могли бы вы подсказать дорогу к музею?"),
+    ("Disembark", "Passengers are requested to remain seated before disembarking.", "Пассажиров просят оставаться на местах перед высадкой."),
+    ("Double bed", "Our room comes with a comfortable double bed.", "В нашем номере есть удобная двуспальная кровать."),
+    ("Downtown", "The hotel is located right in the heart of downtown.", "Отель расположен прямо в центре города."),
+    ("Embark", "We are ready to embark on our European adventure.", "Мы готовы отправиться в наше европейское приключение."),
+    ("Emergency exit", "Locate the nearest emergency exit upon entering the room.", "Найдите ближайший запасной выход при входе в номер."),
+    ("Excess baggage", "The airline charged a fee for excess baggage.", "Авиакомпания взяла плату за сверхнормативный багаж."),
+    ("Excursion", "We booked a guided excursion to the ancient ruins.", "Мы забронировали экскурсию с гидом к древним руинам."),
+    ("Express train", "The express train takes only thirty minutes to the city center.", "Скорый поезд доставляет до центра города всего за тридцать минут."),
+    ("Farecard", "You need a valid farecard to enter the subway system.", "Вам нужна действующая проездная карта для входа в метро."),
+    ("First class", "First class passengers enjoy luxury lounge access.", "Пассажиры первого класса имеют доступ к элитным лаунжам."),
+    ("Flight path", "The captain adjusted the flight path to avoid turbulence.", "Капитан скорректировал траекторию полета во избежание турбулентности."),
+    ("Foreign currency", "Always keep some foreign currency for emergencies.", "Всегда храните немного иностранной валюты на экстренный случай."),
+    ("Front desk", "Ask the front desk for an extra blanket.", "Попросите на ресепшене дополнительное одеяло."),
+    ("Fuel", "We need to refuel the rental car before dropping it off.", "Нам нужно заправить арендованный автомобиль перед возвратом."),
+    ("Gate agent", "The gate agent announced a delay for our boarding group.", "Сотрудник у выхода объявил о задержке для нашей группы посадки."),
+    ("Global", "Global travel requires proper adapter plugs.", "Для глобальных путешествий требуются правильные переходники для розеток."),
+    ("Guest house", "We stayed at a charming family-run guest house.", "Мы остановились в очаровательном семейном гестхаусе."),
+    ("Guide", "Our local guide showed us hidden gems of the city.", "Наш местный гид показал нам скрытые жемчужины города."),
+    ("Harbor", "Fishing boats bobbed up and down in the quiet harbor.", "Рыбацкие лодки покачивались в тихой гавани."),
+    ("Headset", "They handed out complimentary headsets for the tour.", "Бесплатные наушники раздали для экскурсии."),
+    ("High season", "Traveling during high season means higher hotel rates.", "Путешествия в высокий сезон означают более высокие цены на отели."),
+    ("Highway code", "Familiarize yourself with the local highway code before driving.", "Ознакомьтесь с местными правилами дорожного движения перед поездкой."),
+    ("Holidaymaker", "Thousands of holidaymakers flooded the beach resorts.", "Тысячи отдыхающих заполонили пляжные курорты."),
+    ("Host", "Our Airbnb host welcomed us with local wine and snacks.", "Наш хозяин на Airbnb встретил нас местным вином и закусками."),
+    ("Hostel dorm", "A hostel dorm is a budget-friendly option for backpackers.", "Дормиторий в хостеле — бюджетный вариант для бэкпекеров."),
+    ("Hot spot", "This historic square is a popular tourist hot spot.", "Эта историческая площадь — популярное туристическое место."),
+    ("Identification", "Always carry valid identification while traveling abroad.", "Всегда носите с собой действительное удостоверение личности за рубежом."),
+    ("Immigration", "We cleared immigration within twenty minutes.", "Мы прошли паспортный контроль за двадцать минут."),
+    ("Inbound", "Inbound flights are fully booked for the weekend.", "Въездные рейсы полностью забронированы на выходные.")
 ]
 
-# ==========================================
-# 2. БОЛЬШАЯ БАЗА ПОЛЕЗНЫХ ФРАЗ
-# ==========================================
-TRAVEL_PHRASES = [
-    # Ориентация
-    {"phrase": "Could you help me, please?", "translation": "Не могли бы вы мне помочь, пожалуйста?"},
-    {"phrase": "Where is the nearest railway station?", "translation": "Где находится ближайший вокзал?"},
-    {"phrase": "How do I get to the city center?", "translation": "Как мне добраться до центра города?"},
-    {"phrase": "Is it far on foot?", "translation": "Это далеко пешком?"},
-    {"phrase": "Could you show it on the map?", "translation": "Не могли бы вы показать это на карте?"},
-    
-    # Покупки и деньги
-    {"phrase": "How much does this cost?", "translation": "Сколько это стоит?"},
-    {"phrase": "Can I pay by card?", "translation": "Могу ли я оплатить картой?"},
-    {"phrase": "Do you accept cash?", "translation": "Вы принимаете наличные?"},
-    {"phrase": "Can I get a discount?", "translation": "Могу ли я получить скидку?"},
-    {"phrase": "I'm just looking, thank you.", "translation": "Я просто смотрю, спасибо."},
-
-    # Отель
-    {"phrase": "I would like to book a room.", "translation": "Я бы хотел забронировать номер."},
-    {"phrase": "Is breakfast included in the price?", "translation": "Включен ли завтрак в стоимость?"},
-    {"phrase": "The air conditioning isn't working.", "translation": "Кондиционер не работает."},
-    {"phrase": "Can I have another room, please?", "translation": "Могу ли я получить другой номер?"},
-    {"phrase": "What time is check-out?", "translation": "Во сколько выселение?"},
-
-    # Ресторан
-    {"phrase": "Could we have the menu, please?", "translation": "Можно нам меню, пожалуйста?"},
-    {"phrase": "I am allergic to nuts.", "translation": "У меня аллергия на орехи."},
-    {"phrase": "Could we have the bill, please?", "translation": "Можно нам счет, пожалуйста?"},
-    {"phrase": "Can we split the bill?", "translation": "Можем ли мы разделить счет?"},
-    {"phrase": "The food was delicious!", "translation": "Еда была восхитительной!"}
-]
-
-# ==============================================================================
-# 3. ПОЛНОЦЕННЫЕ СЮЖЕТНЫЕ КВЕСТЫ (Интерактивные обучающие сценарии)
-# ==============================================================================
-TRAVEL_DIALOGUES = {
-    "module_1": {
-        "title": "✈️ Квест №1: Аэропорт и потерянный багаж",
-        "story": (
-            "🎬 **Сюжет:** Ты прилетел в лондонский аэропорт Хитроу. На часах полночь, "
-            "пассажиры разошлись, а лента выдачи остановилась. Твоего чемодана нет. "
-            "Тебе нужно найти стойку розыска багажа (Lost & Found) и объясниться с сотрудником."
-        ),
-        "phrases": [
-            "🗣️ *«Excuse me, my luggage didn't arrive.»* — Извините, мой багаж не прилетел.",
-            "🗣️ *«Here is my claim tag and boarding pass.»* — Вот моя багажная бирка и посадочный.",
-            "🗣️ *«Where can I track it?»* — Где я могу отследить его?"
-        ],
-        "task_text": "🎮 **Сюжетный выбор:** Ты подходишь к стойке. Какую фразу лучше использовать первой?",
-        "options": [
-            {"text": "«Here is my claim tag. My luggage didn't arrive.»", "correct": True},
-            {"text": "«Give me a new suitcase right now, this is unacceptable!»", "correct": False},
-            {"text": "«I lost my bag somewhere in the clouds, find it fast.»", "correct": False}
-        ],
-        "tip": "💡 Вежливое обращение (*Excuse me*) и демонстрация бирки (*claim tag*) ускоряют решение проблемы в 10 раз."
+TRAVEL_STORIES = [
+    {
+        "id": 1,
+        "title": "1. At the Check-in Counter (В аэропорту на регистрации)",
+        "content": "Agent: Good morning! Where are you flying today?\nPassenger: Good morning! I'm flying to Paris. Here is my passport.\nAgent: Thank you. Do you have any bags to check?\nPassenger: Yes, just this suitcase.\nAgent: Please place it on the scale. ... Everything is fine. Here is your boarding pass. Gate B12, boarding starts at 10:30.\nPassenger: Thank you very much!"
     },
-    "module_2": {
-        "title": "🏨 Квест №2: Отель и сломанный кондиционер",
-        "story": (
-            "🎬 **Сюжет:** Ты заселился в отель в центре Барселоны. На улице +35°C, "
-            "ты заходишь в номер, а кондиционер издает странный треск и дует горячим воздухом. "
-            "В комнате духота. Нужно спуститься на ресепшн и потребовать помощи."
-        ),
-        "phrases": [
-            "🗣️ *«The air conditioning in my room isn't working.»* — Кондиционер в моем номере не работает.",
-            "🗣️ *«Can I get another room, please?»* — Могу ли я получить другой номер?",
-            "🗣️ *«It's too hot in there.»* — Там слишком жарко."
-        ],
-        "task_text": "🎮 **Сюжетный выбор:** Администратор смотрит на тебя. Как грамотно описать проблему?",
-        "options": [
-            {"text": "«The AC in my room isn't working. Can I get another room?»", "correct": True},
-            {"text": "«Your hotel is terrible, fix the weather outside immediately.»", "correct": False},
-            {"text": "«I want cold air for free or I will sleep in the lobby.»", "correct": False}
-        ],
-        "tip": "💡 Конструкция *'isn't working'* идеально подходит для любых поломок техники в номерах."
+    {
+        "id": 2,
+        "title": "2. Passing Security Check (Прохождение контроля безопасности)",
+        "content": "Officer: Step forward, please. Put your laptop and metallic items in this tray.\nPassenger: Should I take off my shoes?\nOfficer: Yes, please remove your shoes and belt, and place your liquids in a transparent plastic bag.\nPassenger: Here they are. Is my backpack okay?\nOfficer: Yes, your backpack passed inspection. Have a nice flight!"
     },
-    "module_3": {
-        "title": "🍽️ Квест №3: Ресторан и раздельный счет",
-        "story": (
-            "🎬 **Сюжет:** Ты поужинал с новыми знакомыми в итальянском ресторане в Риме. "
-            "Еда была отличной, но теперь официант приносит общий бумажный чек. "
-            "Вам нужно вежливо попросить разделить сумму на всех участников."
-        ),
-        "phrases": [
-            "🗣️ *«Could we have the bill, please?»* — Можно нам счет, пожалуйста?",
-            "🗣️ *«Can we split the bill equally?»* — Можем ли мы разделить счет поровну?",
-            "🗣️ *«Can I pay by card separately?»* — Могу ли я оплатить картой отдельно?"
-        ],
-        "task_text": "🎮 **Сюжетный выбор:** Официант ждет ответа. Что сказать, чтобы разделить чек?",
-        "options": [
-            {"text": "«Can we split the bill, please?»", "correct": True},
-            {"text": "«Take all my money and run away.»", "correct": False},
-            {"text": "«I will pay for everyone forever, don't worry.»", "correct": False}
-        ],
-        "tip": "💡 Фраза *'split the bill'* универсальна для баров, кафе и ресторанов по всему миру."
+    {
+        "id": 3,
+        "title": "3. Boarding the Airplane (Посадка в самолет)",
+        "content": "Attendant: Good afternoon! May I see your boarding pass and passport, please?\nPassenger: Here you are.\nAttendant: Thank you, Mr. Smith. Your seat is 14A, window seat. Down the aisle to the left, and enjoy your flight.\nPassenger: Thanks!"
     },
-    "module_4": {
-        "title": "🚨 Квест №4: ЧП и потеря документов",
-        "story": (
-            "🎬 **Сюжет:** Ты вышел из метро в незнакомом мегаполисе, зазевался, "
-            "и у тебя из кармана вытащили кошелек, в котором лежали карты и паспорт. "
-            "Срочно нужно обратиться к полицейскому на улице."
-        ),
-        "phrases": [
-            "🗣️ *«Excuse me! My wallet has been stolen!»* — Извините! Мой кошелек украли!",
-            "🗣️ *«Where is the nearest police station?»* — Где ближайший полицейский участок?",
-            "🗣️ *«I need to block my bank cards.»* — Мне нужно заблокировать банковские карты."
-        ],
-        "task_text": "🎮 **Сюжетный выбор:** Ты подходишь к патрульному. С чего начать разговор?",
-        "options": [
-            {"text": "«Excuse me, my wallet was stolen, I need help.»", "correct": True},
-            {"text": "«Do you want to play a hide and seek game with me?»", "correct": False},
-            {"text": "«Everything is fine, I lost my money for fun.»", "correct": False}
-        ],
-        "tip": "💡 В экстренной ситуации всегда привлекай внимание вежливым *'Excuse me'* и сразу заявляй о краже (*stolen*)."
+    {
+        "id": 4,
+        "title": "4. In-Flight Service (Обслуживание на борту)",
+        "content": "Attendant: Would you like something to drink? We have water, juice, and coffee.\nPassenger: Could I have a cup of chamomile tea with milk, please?\nAttendant: Certainly. Would you like a snack as well?\nPassenger: No, thank you, I'm fine.\nAttendant: Here is your tea. Enjoy!"
+    },
+    {
+        "id": 5,
+        "title": "5. Baggage Claim (Получение багажа)",
+        "content": "Passenger: Excuse me, where can I find baggage claim for flight LH428?\nStaff: Carousel number 3, right over there past customs.\nPassenger: Thank you. Do you know how long it takes?\nStaff: Usually about ten minutes. Your bags should be coming out shortly."
+    },
+    {
+        "id": 6,
+        "title": "6. Hotel Check-in (Заселение в отель)",
+        "content": "Receptionist: Good evening! Welcome to Grand Hotel. How can I help you?\nGuest: Good evening. I have a reservation under the name Alex Smith.\nReceptionist: Let me check... Yes, a deluxe double room for three nights. May I have your passport and a credit card for incidental expenses?\nGuest: Sure, here is my passport and card.\nReceptionist: Thank you. Here is your electronic keycard. Room 504 on the fifth floor. Enjoy your stay!"
+    },
+    {
+        "id": 7,
+        "title": "7. Asking for Hotel Amenities (Услуги в отеле)",
+        "content": "Guest: Hello, what time does breakfast start tomorrow morning?\nReceptionist: Breakfast is served from 6:30 AM to 10:00 AM in the main dining hall on the ground floor.\nGuest: Excellent. And is Wi-Fi free in the rooms?\nReceptionist: Yes, the Wi-Fi is free. The password is printed on the back of your keycard."
+    },
+    {
+        "id": 8,
+        "title": "8. Hotel Checkout and Taxi (Выселение и вызов такси)",
+        "content": "Guest: Good morning, I'd like to check out, please. Room 302.\nReceptionist: Certainly. How was your stay?\nGuest: It was wonderful, thank you.\nReceptionist: Excellent. Your total is paid in full. Could I order a taxi for you to the railway station?\nGuest: Yes, please. That would be great."
+    },
+    {
+        "id": 9,
+        "title": "9. Buying Train Tickets (Покупка билетов на поезд)",
+        "content": "Passenger: Hello! I need two tickets to London for tomorrow afternoon, please.\nClerk: Express or standard service?\nPassenger: Express, please. How much is it?\nClerk: That will be eighty pounds total. Cash or card?\nPassenger: Card, please."
+    },
+    {
+        "id": 10,
+        "title": "10. At the Train Station Platform (На железнодорожной платформе)",
+        "content": "Passenger: Excuse me, is this the train to Manchester?\nStaff: No, this is the local train to Liverpool. Manchester departs from platform 5 in ten minutes.\nPassenger: Thank you so much! I almost got on the wrong train."
+    },
+    {
+        "id": 11,
+        "title": "11. Taking a City Taxi (Поездка на городском такси)",
+        "content": "Driver: Where to, sir?\nPassenger: Please take me to the National Museum on Main Street.\nDriver: Sure thing. Buckle up, traffic is a bit heavy today.\nPassenger: No problem, we have plenty of time. How much is the estimated fare?\nDriver: Around fifteen dollars."
+    },
+    {
+        "id": 12,
+        "title": "12. Renting a Car (Аренда автомобиля)",
+        "content": "Agent: Good morning! How can I assist you with your car rental?\nCustomer: I reserved a compact car online under code #7892.\nAgent: Perfect. May I see your driver's license and passport? Also, would you like to add full insurance coverage?\nCustomer: Yes, please add full coverage with zero deductible."
+    },
+    {
+        "id": 13,
+        "title": "13. At the Restaurant Table (В ресторане за столиком)",
+        "content": "Waiter: Good evening! Are you ready to order, or would you like a few more minutes?\nCustomer: We are ready. For the appetizer, we'll take the Caesar salad, and for the main course, grilled steak.\nWaiter: How would you like your steak cooked?\nCustomer: Medium rare, please."
+    },
+    {
+        "id": 14,
+        "title": "14. Asking for the Bill (Просьба рассчитать в ресторане)",
+        "content": "Customer: Excuse me, could we have the bill, please?\nWaiter: Certainly! Cash or credit card?\nCustomer: Credit card. Do you accept contactless payment?\nWaiter: Yes, just tap your phone or card right here on the terminal."
+    },
+    {
+        "id": 15,
+        "title": "15. Exchanging Currency (Обмен валюты)",
+        "content": "Customer: Hello, I would like to exchange three hundred US dollars into euros, please.\nClerk: Certainly. Today's exchange rate is 0.92 euros per dollar. Please sign this receipt.\nCustomer: Here is my passport and cash.\nClerk: Thank you, here are your euros and receipt."
+    },
+    {
+        "id": 16,
+        "title": "16. Asking for Directions (Как пройти / проехать)",
+        "content": "Tourist: Excuse me, could you tell me how to get to the central cathedral?\nLocal: Sure! Go straight down this street, turn left at the traffic lights, and you will see it right across the square.\nTourist: Is it far to walk?\nLocal: No, only about ten minutes on foot."
+    },
+    {
+        "id": 17,
+        "title": "17. Shopping for Souvenirs (Покупка сувениров)",
+        "content": "Tourist: How much is this handmade ceramic mug?\nShopkeeper: It is fifteen euros.\nTourist: That's lovely. Can I pay with a credit card?\nShopkeeper: Yes, for purchases over ten euros, card is fine."
+    },
+    {
+        "id": 18,
+        "title": "18. Visiting a Museum (Посещение музея)",
+        "content": "Visitor: Hello, how much is an adult ticket for the permanent exhibition?\nCashier: It's twelve euros, and an audio guide is an extra four euros.\nVisitor: I'll take one ticket with an audio guide, please, in English.\nCashier: Here is your ticket and headset. Enjoy your visit!"
+    },
+    {
+        "id": 19,
+        "title": "19. At the Pharmacy in a Foreign City (В аптеке за рубежом)",
+        "content": "Customer: Hello, do you speak English? I have a terrible headache and need some painkillers.\nPharmacist: Yes, I do. These tablets work very fast for headaches. Take one pill with water.\nCustomer: How much do they cost?\nPharmacist: Six euros fifty cents, please."
+    },
+    {
+        "id": 20,
+        "title": "20. At the Lost and Found (Бюро находок в аэропорту)",
+        "content": "Passenger: Hello, I left my laptop bag on flight BA249 this morning.\nStaff: Let's check our database. What color is the bag and what brand is the laptop?\nPassenger: It's a black Dell backpack.\nStaff: We have one matching description brought in an hour ago. Please verify ownership."
+    },
+    {
+        "id": 21,
+        "title": "21. Reporting a Delayed Flight (Объяснение при задержке рейса)",
+        "content": "Passenger: Excuse me, my flight to Rome was supposed to depart at 2 PM, but the board says delayed.\nAgent: Yes, due to air traffic control restrictions, departure is delayed by two hours. Here is a voucher for a complimentary meal at the airport cafe.\nPassenger: Thank you for letting me know."
+    },
+    {
+        "id": 22,
+        "title": "22. Asking about Public Transport (Вопрос об общественном транспорте)",
+        "content": "Tourist: Which subway line goes to the central station?\nOfficer: Take the blue line, direction North, and get off at Station Central.\nTourist: How often do the trains run?\nOfficer: Every four to five minutes during daytime."
+    },
+    {
+        "id": 23,
+        "title": "23. In a Coffee Shop (В кофейне во время путешествия)",
+        "content": "Barista: Hi there! What can I get for you today?\nCustomer: A large cappuccino with oat milk and a blueberry muffin, please.\nBarista: To stay or to go?\nCustomer: To go, please.\nBarista: That will be seven fifty. Name for the order?"
+    },
+    {
+        "id": 24,
+        "title": "24. At the Car Rental Return (Возврат арендованного авто)",
+        "content": "Agent: Good afternoon! Returning the car?\nDriver: Yes, here are the keys. The tank is full, just as required.\nAgent: Perfect, let me inspect the car around... Looks pristine. No scratches. Your final invoice has been emailed. Have a safe flight back!"
+    },
+    {
+        "id": 25,
+        "title": "25. Meeting at the Hotel Concierge (Услуги консьержа в отеле)",
+        "content": "Guest: Good evening! Could you recommend a nice traditional local restaurant within walking distance?\nConcierge: Certainly! There is a wonderful family-run restaurant just two blocks away called Bella Vista. I can reserve a table for you at 8 PM if you like.\nGuest: That would be fantastic. Thank you so much!"
     }
-}
+]
 
-def get_random_travel_dialogue():
-    """Возвращает случайный сюжетный модуль путешествий."""
-    key = random.choice(list(TRAVEL_DIALOGUES.keys()))
-    return key, TRAVEL_DIALOGUES[key]
+def get_travel_vocabulary():
+    return TRAVEL_WORDS
+
+def get_travel_stories():
+    return TRAVEL_STORIES

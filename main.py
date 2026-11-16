@@ -2,7 +2,6 @@ import os
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import threading
 
-# Надежный веб-сервер в отдельном потоке для мгновенного открытия порта на Render
 def run_server():
     port = int(os.environ.get("PORT", 10000))
     server = HTTPServer(("0.0.0.0", port), BaseHTTPRequestHandler)
@@ -26,7 +25,6 @@ from aiogram.types import (
     ReplyKeyboardMarkup,
 )
 
-# Настройка логирования
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
@@ -57,7 +55,7 @@ def save_database():
 
 USERS_DB = load_database()
 
-def get_user(user_id: int, first_name: str = "Student"):
+def get_user(user_id: int, first_name: str = "Ученик"):
     str_id = str(user_id)
     if str_id not in USERS_DB:
         USERS_DB[str_id] = {
@@ -68,16 +66,21 @@ def get_user(user_id: int, first_name: str = "Student"):
             "words": 0,
             "tests": 0,
             "refs": 0,
+            "ref_days_claimed": 0,
             "streak": 1,
             "last_word_time": 0,
             "reg_date": datetime.date.today().strftime("%d.%m.%Y"),
+            "block_progress": {}
         }
         save_database()
     else:
         USERS_DB[str_id]["name"] = first_name
+        if "block_progress" not in USERS_DB[str_id]:
+            USERS_DB[str_id]["block_progress"] = {}
+        if "ref_days_claimed" not in USERS_DB[str_id]:
+            USERS_DB[str_id]["ref_days_claimed"] = 0
     return USERS_DB[str_id]
 
-# 100% точный импорт всех твоих модулей из проекта без пропусков
 try:
     import vocabulary_a1
     import vocabulary_a2
@@ -90,6 +93,7 @@ try:
     import vocabulary_grammar
     import vocabulary_homework
     import vocabulary_premium
+    import vocabulary_premium_travel
     import vocabulary_radin_b1
     import vocabulary_radin_b2
     import vocabulary_radin_c1
@@ -107,20 +111,19 @@ def get_main_keyboard():
     return ReplyKeyboardMarkup(
         keyboard=[
             [
-                KeyboardButton(text="📚 Learn Words"),
-                KeyboardButton(text="🎯 Tests & Quiz"),
+                KeyboardButton(text="📚 Учить слова"),
+                KeyboardButton(text="🎯 Тесты и блиц"),
             ],
             [
-                KeyboardButton(text="📖 Reading Texts"),
-                KeyboardButton(text="🎮 Games & Chat"),
+                KeyboardButton(text="📖 Чтение текстов"),
+                KeyboardButton(text="🎮 Игры и чат"),
             ],
             [
-                KeyboardButton(text="🏆 Leaderboard (500⭐)"),
-                KeyboardButton(text="👤 Profile"),
+                KeyboardButton(text="🏆 Лидерборд (500⭐)"),
+                KeyboardButton(text="👤 Профиль"),
             ],
             [
-                KeyboardButton(text="⚙️ Settings"),
-                KeyboardButton(text="⭐ Get Premium *"),
+                KeyboardButton(text="⭐ Купить Премиум ✨"),
             ],
         ],
         resize_keyboard=True,
@@ -146,68 +149,160 @@ async def cmd_start(message: types.Message):
         except ValueError:
             pass
 
-    welcome_text = (
-        f"👋 Welcome, {message.from_user.first_name}!\n\n"
-        "🚀 Профессиональный образовательный бот для эффективного изучения английского языка.\n"
-        "🔥 **Участвуйте в рейтинге!** Приглашайте друзей, изучайте слова из базы и получайте награды:\n"
-        "🥇 **1 место:** Уникальный NFT за 500 звезд!\n"
-        "🥈 **2 и 🥉 3 места:** Премиум-доступ на 1 месяц бесплатно!\n\n"
-        "Выберите нужный раздел в меню ниже 👇"
-    )
-    await message.answer(
-        welcome_text, reply_markup=get_main_keyboard(), parse_mode="Markdown"
+    welcome_keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="🟢 Уровень A1 (Beginner)", callback_data="start_set_a1")],
+            [InlineKeyboardButton(text="🟢 Уровень A2 (Elementary)", callback_data="start_set_a2")],
+            [InlineKeyboardButton(text="⭐ Уровень B1 (Intermediate - Премиум)", callback_data="start_set_b1")],
+            [InlineKeyboardButton(text="⭐ Уровень B2 (Upper-Intermediate - Премиум)", callback_data="start_set_b2")],
+            [InlineKeyboardButton(text="⭐ Уровень C1 (Advanced - Премиум)", callback_data="start_set_c1")],
+        ]
     )
 
-@dp.message(F.text.in_(["🏠 Главное меню", "Main Menu"]))
+    welcome_text = (
+        f"👋 Привет, {message.from_user.first_name}!\n\n"
+        "🚀 Профессиональный образовательный бот для эффективного изучения английского языка со всеми базами и модулями.\n\n"
+        "🎯 **Выберите ваш текущий уровень владения английским языком**, чтобы бот адаптировал программы обучения и словари под вас:"
+    )
+    await message.answer(
+        welcome_text, reply_markup=welcome_keyboard, parse_mode="Markdown"
+    )
+
+@dp.callback_query(F.data.startswith("start_set_"))
+async def callback_start_set_level(callback: types.CallbackQuery):
+    user_id = callback.from_user.id
+    user_data = get_user(user_id, callback.from_user.first_name)
+    chosen_lvl = callback.data.replace("start_set_", "")
+
+    if chosen_lvl in ["b1", "b2", "c1"] and not user_data["is_premium"]:
+        user_data["level"] = chosen_lvl
+        save_database()
+        await callback.message.edit_text(
+            f"⭐ Вы выбрали уровень **{chosen_lvl.upper()}**.\n"
+            "Обратите внимание: уровни от B1 до C1 требуют Премиум-подписки. Вы можете активировать её прямо сейчас или временно выбрать базовый уровень A1/A2.",
+            reply_markup=InlineKeyboardMarkup(
+                inline_keyboard=[
+                    [InlineKeyboardButton(text="⭐ Купить Премиум ✨", callback_data="prem_buy_cb")],
+                    [InlineKeyboardButton(text="🔄 Выбрать другой уровень", callback_data="restart_choose_lvl")]
+                ]
+            ),
+            parse_mode="Markdown"
+        )
+        await callback.answer()
+        return
+
+    user_data["level"] = chosen_lvl
+    save_database()
+
+    await callback.message.delete()
+    await callback.message.answer(
+        f"✅ Уровень **{chosen_lvl.upper()}** успешно установлен и сохранен в вашем профиле!\n\n"
+        "🔥 **Участвуйте в битве за призы!** Приглашайте друзей, учите слова из баз и забирайте главные награды:\n"
+        "🥇 **1 место:** Уникальный NFT за 500 звезд!\n"
+        "🥈 **2 и 🥉 3 места:** Премиум-доступ на 1 месяц бесплатно!\n\n"
+        "Используйте панель управления внизу для навигации 👇",
+        reply_markup=get_main_keyboard(),
+        parse_mode="Markdown"
+    )
+    await callback.answer()
+
+@dp.callback_query(F.data == "restart_choose_lvl")
+async def restart_choose_lvl_cb(callback: types.CallbackQuery):
+    welcome_keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="🟢 Уровень A1 (Beginner)", callback_data="start_set_a1")],
+            [InlineKeyboardButton(text="🟢 Уровень A2 (Elementary)", callback_data="start_set_a2")],
+            [InlineKeyboardButton(text="⭐ Уровень B1 (Intermediate - Премиум)", callback_data="start_set_b1")],
+            [InlineKeyboardButton(text="⭐ Уровень B2 (Upper-Intermediate - Премиум)", callback_data="start_set_b2")],
+            [InlineKeyboardButton(text="⭐ Уровень C1 (Advanced - Премиум)", callback_data="start_set_c1")],
+        ]
+    )
+    await callback.message.edit_text(
+        "🎯 **Выберите ваш текущий уровень владения английским языком:**",
+        reply_markup=welcome_keyboard,
+        parse_mode="Markdown"
+    )
+    await callback.answer()
+
+@dp.message(F.text == "🏠 Главное меню")
 async def main_menu(message: types.Message):
     await message.answer(
         "🏠 Вы вернулись в главное меню:", reply_markup=get_main_keyboard()
     )
 
-@dp.message(F.text == "📚 Learn Words")
+@dp.message(F.text == "📚 Учить слова")
 async def learn_words_handler(message: types.Message):
     user_data = get_user(message.from_user.id, message.from_user.first_name)
     current_level = user_data.get("level", "a1")
 
+    if current_level in ["b1", "b2", "c1"] and not user_data["is_premium"]:
+        await message.answer(
+            f"⭐ Уровень **{current_level.upper()}** доступен только по Премиум-подписке!\n"
+            "Вы можете изменить уровень на A1/A2 в профиле или приобрести Премиум.",
+            reply_markup=InlineKeyboardMarkup(
+                inline_keyboard=[
+                    [InlineKeyboardButton(text="👤 В профиль (сменить уровень)", callback_data="open_profile")],
+                    [InlineKeyboardButton(text="⭐ Купить Премиум ✨", callback_data="prem_buy_cb")],
+                    [InlineKeyboardButton(text="🏠 Главное меню", callback_data="to_main")]
+                ]
+            ),
+            parse_mode="Markdown"
+        )
+        return
+
+    bp = user_data.setdefault("block_progress", {})
+    block_target = 100
+
+    p1 = min(100, int((bp.get(f"{current_level}_1", 0) / block_target) * 100))
+    p2 = min(100, int((bp.get(f"{current_level}_2", 0) / block_target) * 100))
+    p3 = min(100, int((bp.get(f"{current_level}_3", 0) / block_target) * 100))
+
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="📖 Учить слова по уровню", callback_data=f"lvl_train_{current_level}")],
-            [InlineKeyboardButton(text="⚡ Словарный спринт (A1-C1)", callback_data="sprint_menu")],
+            [InlineKeyboardButton(text=f"📦 Блок 1 (Часть 1) — завершено {p1}%", callback_data=f"block_{current_level}_1")],
+            [InlineKeyboardButton(text=f"📦 Блок 2 (Часть 2) — завершено {p2}%", callback_data=f"block_{current_level}_2")],
+            [InlineKeyboardButton(text=f"📦 Блок 3 (Часть 3) — завершено {p3}%", callback_data=f"block_{current_level}_3")],
+            [InlineKeyboardButton(text="⚡ Словарный спринт", callback_data="sprint_menu")],
             [InlineKeyboardButton(text="👤 Сменить уровень в профиле", callback_data="open_profile")],
             [InlineKeyboardButton(text="🏠 Главное меню", callback_data="to_main")]
         ]
     )
+
     await message.answer(
-        f"📚 **Словарный тренажер английского языка**\n"
-        f"🎯 Ваш текущий уровень: **{current_level.upper()}**\n\n"
-        "Выберите режим тренировки слов:",
+        f"📚 **Профессиональный словарный тренажер**\n"
+        f"🎯 Текущий уровень: **{current_level.upper()}**\n\n"
+        "Выберите один из трех блоков лексики для глубокого изучения и отслеживания прогресса:",
         reply_markup=keyboard,
         parse_mode="Markdown"
     )
 
-@dp.callback_query(F.data.startswith("lvl_train_"))
-async def callback_lvl_train(callback: types.CallbackQuery):
+@dp.callback_query(F.data.startswith("block_"))
+async def callback_block_train(callback: types.CallbackQuery):
     user_id = callback.from_user.id
     user_data = get_user(user_id, callback.from_user.first_name)
-    lvl = callback.data.replace("lvl_train_", "")
+    
+    parts = callback.data.split("_")
+    lvl = parts[1]
+    block_num = parts[2]
 
     if lvl in ["b1", "b2", "c1"] and not user_data["is_premium"]:
-        await callback.answer(
-            "⭐ Этот уровень доступен только по Премиум-подписке!", show_alert=True
-        )
+        await callback.answer("⭐ Этот уровень доступен только по Премиум-подписке!", show_alert=True)
         return
 
-    user_data["words"] += 1
-    user_data["points"] += 10
+    bp = user_data.setdefault("block_progress", {})
+    key = f"{lvl}_{block_num}"
+    bp[key] = bp.get(key, 0) + 5
+    user_data["words"] += 5
+    user_data["points"] += 25
     save_database()
 
-    target_words = 300
-    current_words = user_data["words"]
-    percent = min(100, int((current_words / target_words) * 100))
+    block_target = 100
+    current_block_words = bp[key]
+    percent = min(100, int((current_block_words / block_target) * 100))
     filled = int(percent / 10)
     progress_bar = "█" * filled + "░" * (10 - filled)
 
-    content = f"📖 Слово уровня **{lvl.upper()}** успешно загружено из модуля словаря!"
+    content = f"📖 Детальный урок словаря уровня **{lvl.upper()}** (Блок {block_num}) успешно загружен из базы данных!"
     try:
         if lvl == "a1" and "vocabulary_a1" in globals():
             content = vocabulary_a1.get_lesson()
@@ -220,28 +315,31 @@ async def callback_lvl_train(callback: types.CallbackQuery):
         elif lvl == "c1" and "vocabulary_c1" in globals():
             content = vocabulary_c1.get_lesson()
     except Exception as e:
-        logger.error(f"Ошибка словаря: {e}")
+        logger.error(f"Ошибка вызова модуля словаря: {e}")
 
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="➡️ Следующее слово", callback_data=f"lvl_train_{lvl}")],
-            [InlineKeyboardButton(text="⬅️ Назад к выбору", callback_data="back_to_words")],
+            [InlineKeyboardButton(text="➡️ Следующая порция слов", callback_data=f"block_{lvl}_{block_num}")],
+            [InlineKeyboardButton(text="⬅️ К выбору блоков", callback_data="back_to_blocks")],
             [InlineKeyboardButton(text="🏠 Главное меню", callback_data="to_main")]
         ]
     )
+
     await callback.message.edit_text(
-        f"✅ **Тренировка лексики ({lvl.upper()}):**\n\n{content}\n\n"
-        f"📊 **Прогресс:** {current_words}/{target_words} слов ({percent}%)\n"
-        f"[{progress_bar}]\n\n🚀 +10 очков зачислено в рейтинг!",
+        f"✅ **Тренировка лексики ({lvl.upper()} — Блок {block_num}):**\n\n{content}\n\n"
+        f"📊 **Прогресс блока {block_num}:** {current_block_words}/{block_target} слов ({percent}%)\n"
+        f"[{progress_bar}]\n\n🚀 +25 очков зачислено в рейтинг!",
         reply_markup=keyboard,
         parse_mode="Markdown"
     )
     await callback.answer()
 
-@dp.callback_query(F.data == "back_to_words")
-async def back_to_words_cb(callback: types.CallbackQuery):
+@dp.callback_query(F.data == "back_to_blocks")
+async def back_to_blocks_cb(callback: types.CallbackQuery):
     await callback.message.delete()
-    await learn_words_handler(callback.message)
+    fake_msg = callback.message
+    fake_msg.from_user = callback.from_user
+    await learn_words_handler(fake_msg)
     await callback.answer()
 
 @dp.callback_query(F.data == "sprint_menu")
@@ -253,7 +351,7 @@ async def sprint_menu_cb(callback: types.CallbackQuery):
             [InlineKeyboardButton(text="⭐ Спринт B1 (Премиум)", callback_data="sprint_b1")],
             [InlineKeyboardButton(text="⭐ Спринт B2 (Премиум)", callback_data="sprint_b2")],
             [InlineKeyboardButton(text="⭐ Спринт C1 (Премиум)", callback_data="sprint_c1")],
-            [InlineKeyboardButton(text="⬅️ Назад", callback_data="back_to_words")],
+            [InlineKeyboardButton(text="⬅️ Назад к блокам", callback_data="back_to_blocks")],
         ]
     )
     await callback.message.edit_text(
@@ -305,7 +403,7 @@ async def sprint_exec_cb(callback: types.CallbackQuery):
     )
     await callback.answer()
 
-@dp.message(F.text == "🎯 Tests & Quiz")
+@dp.message(F.text == "🎯 Тесты и блиц")
 async def tests_handler(message: types.Message):
     user_data = get_user(message.from_user.id, message.from_user.first_name)
     user_data["tests"] += 1
@@ -326,7 +424,7 @@ async def tests_handler(message: types.Message):
         ]
     )
     await message.answer(
-        "🎯 **Тест на знание английского языка:**\n\nКак правильно переводится слово *«Success»*?",
+        "🎯 **Тест на словарный запас английского языка:**\n\nКак правильно переводится слово *«Success»*?",
         reply_markup=keyboard,
         parse_mode="Markdown",
     )
@@ -348,13 +446,14 @@ async def callback_test(callback: types.CallbackQuery):
         ),
     )
 
-@dp.message(F.text == "📖 Reading Texts")
+@dp.message(F.text == "📖 Чтение текстов")
 async def reading_handler(message: types.Message):
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
             [InlineKeyboardButton(text="📖 Истории и статьи", callback_data="read_stories")],
-            [InlineKeyboardButton(text="✈️ Путешествия (Базовые)", callback_data="read_travel")],
-            [InlineKeyboardButton(text="⭐ VIP-путешествия (Премиум) *", callback_data="read_prem_travel")],
+            [InlineKeyboardButton(text="✈️ Путешествия (200 слов + 25 историй)", callback_data="read_travel")],
+            [InlineKeyboardButton(text="⭐ VIP-путешествия (Премиум)", callback_data="read_prem_travel")],
+            [InlineKeyboardButton(text="⭐ Сленг и идиомы (Премиум)", callback_data="read_slang")],
             [InlineKeyboardButton(text="📰 Аудиоматериалы (Radin)", callback_data="read_radin")],
             [InlineKeyboardButton(text="🏠 Главное меню", callback_data="to_main")],
         ]
@@ -389,17 +488,150 @@ async def read_stories_cb(callback: types.CallbackQuery):
 
 @dp.callback_query(F.data == "read_travel")
 async def read_travel_cb(callback: types.CallbackQuery):
-    text = "✈️ **Путешествия:** Загрузка из модуля..."
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="📚 200+ слов для путешествий с примерами", callback_data="travel_vocab_1")],
+            [InlineKeyboardButton(text="💬 25 историй и диалогов (Аэропорты/Отели)", callback_data="travel_stories_menu")],
+            [InlineKeyboardButton(text="⬅️ Назад к чтению", callback_data="back_to_reading")],
+            [InlineKeyboardButton(text="🏠 Главное меню", callback_data="to_main")]
+        ]
+    )
+    await callback.message.edit_text(
+        "✈️ **Интерактивный модуль путешествий**\n\n"
+        "Выберите, что вы хотите изучить:\n"
+        "• **200+ слов** с примерами и переводами для любых ситуаций в поезде, аэропорту и городе.\n"
+        "• **25 увлекательных историй и диалогов** (в отелях, ресторанах, на вокзалах).",
+        reply_markup=keyboard,
+        parse_mode="Markdown"
+    )
+    await callback.answer()
+
+@dp.callback_query(F.data.startswith("travel_vocab_"))
+async def travel_vocab_page_cb(callback: types.CallbackQuery):
+    page = int(callback.data.replace("travel_vocab_", ""))
+    words = []
     try:
-        if "vocabulary_travel" in globals() and hasattr(vocabulary_travel, "get_dialog"):
-            text = vocabulary_travel.get_dialog()
+        if "vocabulary_travel" in globals() and hasattr(vocabulary_travel, "get_travel_vocabulary"):
+            words = vocabulary_travel.get_travel_vocabulary()
     except Exception:
         pass
+
+    if not words:
+        words = [("Passport", "Please show your passport.", "Пожалуйста, покажите паспорт.")]
+
+    per_page = 10
+    total_pages = (len(words) + per_page - 1) // per_page
+    start_idx = (page - 1) * per_page
+    end_idx = min(start_idx + per_page, len(words))
+
+    text = f"📚 **Словарь путешественника (Страница {page}/{total_pages}):**\n\n"
+    for i in range(start_idx, end_idx):
+        w, ex, tr = words[i]
+        text += f"*{i+1}. {w}*\n   💬 {ex}\n   🇷🇺 _{tr}_\n\n"
+
+    buttons = []
+    nav_row = []
+    if page > 1:
+        nav_row.append(InlineKeyboardButton(text="⬅️ Назад", callback_data=f"travel_vocab_{page-1}"))
+    if page < total_pages:
+        nav_row.append(InlineKeyboardButton(text="Вперед ➡️", callback_data=f"travel_vocab_{page+1}"))
+    if nav_row:
+        buttons.append(nav_row)
+
+    buttons.append([InlineKeyboardButton(text="✈️ К меню путешествий", callback_data="read_travel")])
+    buttons.append([InlineKeyboardButton(text="🏠 Главное меню", callback_data="to_main")])
+
     user_data = get_user(callback.from_user.id, callback.from_user.first_name)
-    user_data["points"] += 30
+    user_data["points"] += 15
+    save_database()
+
+    await callback.message.edit_text(
+        text,
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons),
+        parse_mode="Markdown"
+    )
+    await callback.answer()
+
+@dp.callback_query(F.data == "travel_stories_menu")
+async def travel_stories_menu_cb(callback: types.CallbackQuery):
+    stories = []
+    try:
+        if "vocabulary_travel" in globals() and hasattr(vocabulary_travel, "get_travel_stories"):
+            stories = vocabulary_travel.get_travel_stories()
+    except Exception:
+        pass
+
+    keyboard_buttons = []
+    for s in stories:
+        keyboard_buttons.append([InlineKeyboardButton(text=s["title"], callback_data=f"travel_story_{s['id']}")])
+    
+    keyboard_buttons.append([InlineKeyboardButton(text="✈️ К меню путешествий", callback_data="read_travel")])
+    keyboard_buttons.append([InlineKeyboardButton(text="🏠 Главное меню", callback_data="to_main")])
+
+    await callback.message.edit_text(
+        "💬 **25 историй и диалогов в путешествиях**\n\nВыберите историю для чтения:",
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard_buttons),
+        parse_mode="Markdown"
+    )
+    await callback.answer()
+
+@dp.callback_query(F.data.startswith("travel_story_"))
+async def travel_story_view_cb(callback: types.CallbackQuery):
+    story_id = int(callback.data.replace("travel_story_", ""))
+    stories = []
+    try:
+        if "vocabulary_travel" in globals() and hasattr(vocabulary_travel, "get_travel_stories"):
+            stories = vocabulary_travel.get_travel_stories()
+    except Exception:
+        pass
+
+    selected = next((s for s in stories if s["id"] == story_id), None)
+    if not selected:
+        selected = {"title": "История", "content": "Содержимое загружается..."}
+
+    user_data = get_user(callback.from_user.id, callback.from_user.first_name)
+    user_data["points"] += 20
+    save_database()
+
+    text = f"📖 **{selected['title']}**\n\n{selected['content']}\n\n✅ Прочитано! +20 очков."
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="⬅️ К списку историй", callback_data="travel_stories_menu")],
+            [InlineKeyboardButton(text="✈️ Меню путешествий", callback_data="read_travel")],
+            [InlineKeyboardButton(text="🏠 Главное меню", callback_data="to_main")]
+        ]
+    )
+    await callback.message.edit_text(text, reply_markup=keyboard, parse_mode="Markdown")
+    await callback.answer()
+
+@dp.callback_query(F.data == "back_to_reading")
+async def back_to_reading_cb(callback: types.CallbackQuery):
+    fake_msg = callback.message
+    fake_msg.from_user = callback.from_user
+    await reading_handler(fake_msg)
+    await callback.answer()
+
+@dp.callback_query(F.data == "read_prem_travel")
+async def read_prem_travel_cb(callback: types.CallbackQuery):
+    user_data = get_user(callback.from_user.id, callback.from_user.first_name)
+    if not user_data["is_premium"]:
+        await callback.answer(
+            "⭐ VIP-путешествия доступны только по Премиум-подписке!",
+            show_alert=True,
+        )
+        return
+
+    prem_text = "⭐ **First Class Journeys & VIP Travel:** Загрузка..."
+    try:
+        if "vocabulary_premium_travel" in globals() and hasattr(vocabulary_premium_travel, "get_vip_travel"):
+            prem_text = vocabulary_premium_travel.get_vip_travel()
+    except Exception:
+        pass
+
+    user_data["points"] += 75
     save_database()
     await callback.message.edit_text(
-        f"{text}\n\n✅ Диалог пройден! +30 очков.",
+        f"{prem_text}\n\n✅ Элитный материал проработан! +75 очков зачислено 🚀",
         reply_markup=InlineKeyboardMarkup(
             inline_keyboard=[[
                 InlineKeyboardButton(text="🏠 Главное меню", callback_data="to_main")
@@ -409,27 +641,27 @@ async def read_travel_cb(callback: types.CallbackQuery):
     )
     await callback.answer()
 
-@dp.callback_query(F.data == "read_prem_travel")
-async def read_prem_travel_cb(callback: types.CallbackQuery):
+@dp.callback_query(F.data == "read_slang")
+async def read_slang_cb(callback: types.CallbackQuery):
     user_data = get_user(callback.from_user.id, callback.from_user.first_name)
     if not user_data["is_premium"]:
         await callback.answer(
-            "⭐ VIP-материалы доступны только по Премиум-подписке!",
+            "⭐ Сленг и идиомы доступны только по Премиум-подписке!",
             show_alert=True,
         )
         return
 
-    prem_text = "⭐ **VIP-путешествия:** Загрузка из премиум-модуля..."
+    slang_text = "⭐ **Сленг и идиомы:** Загрузка..."
     try:
         if "vocabulary_premium" in globals() and hasattr(vocabulary_premium, "get_vip_travel"):
-            prem_text = vocabulary_premium.get_vip_travel()
+            slang_text = vocabulary_premium.get_vip_travel()
     except Exception:
         pass
 
-    user_data["points"] += 75
+    user_data["points"] += 50
     save_database()
     await callback.message.edit_text(
-        f"{prem_text}\n\n✅ VIP-материал проработан! +75 очков зачислено 🚀",
+        f"{slang_text}\n\n✅ Сленг успешно изучен! +50 очков зачислено 🚀",
         reply_markup=InlineKeyboardMarkup(
             inline_keyboard=[[
                 InlineKeyboardButton(text="🏠 Главное меню", callback_data="to_main")
@@ -467,11 +699,11 @@ async def read_radin_cb(callback: types.CallbackQuery):
     )
     await callback.answer()
 
-@dp.message(F.text == "🎮 Games & Chat")
+@dp.message(F.text == "🎮 Игры и чат")
 async def games_handler(message: types.Message):
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="🔍 Детективное расследование *", callback_data="game_detective")],
+            [InlineKeyboardButton(text="🔍 Детективное расследование ⭐", callback_data="game_detective")],
             [InlineKeyboardButton(text="🗺️ Приключение (Adventure)", callback_data="game_adventure")],
             [InlineKeyboardButton(text="💬 Симулятор чата на английском", callback_data="game_chat")],
             [InlineKeyboardButton(text="🏠 Главное меню", callback_data="to_main")],
@@ -547,7 +779,7 @@ async def chat_sim_game(callback: types.CallbackQuery):
     )
     await callback.answer()
 
-@dp.message(F.text == "🏆 Leaderboard (500⭐)")
+@dp.message(F.text == "🏆 Лидерборд (500⭐)")
 async def leaderboard_handler(message: types.Message):
     user_id = message.from_user.id
     get_user(user_id, message.from_user.first_name)
@@ -603,7 +835,7 @@ async def leaderboard_handler(message: types.Message):
     )
     await message.answer(text, reply_markup=keyboard, parse_mode="Markdown")
 
-@dp.message(F.text == "👤 Profile")
+@dp.message(F.text == "👤 Профиль")
 async def profile_handler(message: types.Message):
     user = message.from_user
     user_data = get_user(user.id, user.first_name)
@@ -693,96 +925,193 @@ async def callback_open_lb(callback: types.CallbackQuery):
     await callback.message.delete()
     await leaderboard_handler(callback.message)
 
-@dp.message(F.text == "⚙️ Settings")
-async def settings_handler(message: types.Message):
+@dp.callback_query(F.data == "prem_buy_cb")
+async def callback_prem_buy_cb(callback: types.CallbackQuery):
+    await callback.message.delete()
+    fake_msg = callback.message
+    fake_msg.from_user = callback.from_user
+    await premium_handler(fake_msg)
+    await callback.answer()
+
+@dp.message(F.text == "⭐ Купить Премиум ✨")
+async def premium_handler(message: types.Message):
+    user_id = message.from_user.id
+    get_user(user_id, message.from_user.first_name)
+
+    text = (
+        "⭐ **Центр Премиум-доступа и партнерской программы** ✨🚀\n\n"
+        "Выберите нужный пункт в меню ниже, чтобы получить премиум бесплатно за приглашение друзей или приобрести его мгновенно:"
+    )
+
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="📚 Домашнее задание (500 тем) *", callback_data="homework")],
-            [InlineKeyboardButton(text="📖 Справочник грамматики", callback_data="grammar_ref")],
-            [InlineKeyboardButton(text="⭐ О Премиум подписке", callback_data="premium_info")],
-            [InlineKeyboardButton(text="🏠 Главное меню", callback_data="to_main")],
+            [InlineKeyboardButton(text="🔗 Реферальная ссылка", callback_data="prem_ref_link")],
+            [InlineKeyboardButton(text="👥 Вывести друзей (Бонусы)", callback_data="prem_withdraw_refs")],
+            [InlineKeyboardButton(text="ℹ️ О премиум-подписке", callback_data="prem_about")],
+            [InlineKeyboardButton(text="⭐ Купить Премиум (Stars)", callback_data="prem_buy_stars")],
+            [InlineKeyboardButton(text="🏠 Главное меню", callback_data="to_main")]
         ]
     )
-    await message.answer(
-        "⚙️ **Настройки и справочные материалы:**",
-        reply_markup=keyboard,
-        parse_mode="Markdown",
+
+    await message.answer(text, reply_markup=keyboard, parse_mode="Markdown")
+
+@dp.callback_query(F.data == "prem_ref_link")
+async def prem_ref_link_cb(callback: types.CallbackQuery):
+    user_id = callback.from_user.id
+    ref_link = f"https://t.me/English_StudyyBot?start=ref_{user_id}"
+    user_data = get_user(user_id, callback.from_user.first_name)
+
+    text = (
+        f"🔗 **Твоя реферальная ссылка:**\n`{ref_link}`\n\n"
+        f"👥 Приглашено друзей: **{user_data['refs']}**\n\n"
+        "🎁 **Условия партнерской программы (бонусные дни):**\n"
+        "• 1 друг — 🎁 **1 день** Премиума\n"
+        "• 2 друга — 🎁 **3 дня** Премиума\n"
+        "• 3 друга — 🎁 **5 дней** Премиума\n\n"
+        "Отправляй ссылку друзьям и забирай дни в разделе «Вывести друзей»!"
     )
 
-@dp.callback_query(F.data == "homework")
-async def setting_hw(callback: types.CallbackQuery):
-    user_data = get_user(callback.from_user.id, callback.from_user.first_name)
-    if not user_data["is_premium"]:
-        await callback.answer(
-            "⭐ Домашние задания доступны по Премиум-подписке!",
-            show_alert=True,
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="📤 Поделиться ссылкой",
+                    url=(
+                        "https://t.me/share/url?url="
+                        + ref_link
+                        + "&text=Залетай%20в%20бота,%20учим%20английский%20и%20получаем%20премиум!%20🚀"
+                    ),
+                )
+            ],
+            [InlineKeyboardButton(text="⬅️ Назад в Премиум-меню", callback_data="back_to_prem_menu")]
+        ]
+    )
+
+    await callback.message.edit_text(text, reply_markup=keyboard, parse_mode="Markdown")
+    await callback.answer()
+
+@dp.callback_query(F.data == "prem_withdraw_refs")
+async def prem_withdraw_refs_cb(callback: types.CallbackQuery):
+    user_id = callback.from_user.id
+    user_data = get_user(user_id, callback.from_user.first_name)
+    refs = user_data.get("refs", 0)
+    claimed = user_data.get("ref_days_claimed", 0)
+
+    earned_days = 0
+    if refs >= 3:
+        earned_days = 5
+    elif refs == 2:
+        earned_days = 3
+    elif refs == 1:
+        earned_days = 1
+
+    available_to_claim = max(0, earned_days - claimed)
+
+    text = (
+        f"👥 **Партнерский вывод бонусов**\n\n"
+        f"👤 Приглашено друзей: **{refs}**\n"
+        f"🎁 Всего заработано дней: **{earned_days}**\n"
+        f"✅ Уже выведено/активировано: **{claimed}** дней\n"
+        f"💎 Доступно к выводу: **{available_to_claim}** дней\n\n"
+    )
+
+    if available_to_claim > 0:
+        text += "Нажми кнопку ниже, чтобы активировать бонусные дни премиума!"
+        keyboard = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [InlineKeyboardButton(text=f"🎁 Активировать {available_to_claim} дн. Премиума", callback_data="claim_ref_bonus")],
+                [InlineKeyboardButton(text="⬅️ Назад в Премиум-меню", callback_data="back_to_prem_menu")]
+            ]
         )
-        return
-    hw_text = "📚 **Домашние задания (500 тем):**"
-    try:
-        if "vocabulary_homework" in globals() and hasattr(vocabulary_homework, "get_topics"):
-            hw_text = vocabulary_homework.get_topics()
-    except Exception:
-        pass
-    await callback.message.edit_text(
-        hw_text,
-        reply_markup=InlineKeyboardMarkup(
-            inline_keyboard=[[
-                InlineKeyboardButton(text="🏠 Главное меню", callback_data="to_main")
-            ]]
-        ),
-        parse_mode="Markdown",
+    else:
+        text += "Пригласи больше друзей по своей реферальной ссылке, чтобы разблокировать новые бонусные дни!"
+        keyboard = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [InlineKeyboardButton(text="🔗 Взять реферальную ссылку", callback_data="prem_ref_link")],
+                [InlineKeyboardButton(text="⬅️ Назад в Премиум-меню", callback_data="back_to_prem_menu")]
+            ]
+        )
+
+    await callback.message.edit_text(text, reply_markup=keyboard, parse_mode="Markdown")
+    await callback.answer()
+
+@dp.callback_query(F.data == "claim_ref_bonus")
+async def claim_ref_bonus_cb(callback: types.CallbackQuery):
+    user_id = callback.from_user.id
+    user_data = get_user(user_id, callback.from_user.first_name)
+    refs = user_data.get("refs", 0)
+    claimed = user_data.get("ref_days_claimed", 0)
+
+    earned_days = 5 if refs >= 3 else (3 if refs == 2 else (1 if refs == 1 else 0))
+    available = max(0, earned_days - claimed)
+
+    if available > 0:
+        user_data["is_premium"] = True
+        user_data["ref_days_claimed"] += available
+        save_database()
+        await callback.answer(f"🎉 Успешно! Активировано бонусных дней: {available}", show_alert=True)
+    else:
+        await callback.answer("❌ Нет доступных дней для вывода.", show_alert=True)
+
+    await prem_withdraw_refs_cb(callback)
+
+@dp.callback_query(F.data == "prem_about")
+async def prem_about_cb(callback: types.CallbackQuery):
+    text = (
+        "ℹ️ **О премиум-подписке EnglishStudy** ⭐\n\n"
+        "Премиум открывает полный функционал бота для тех, кто настроен выучить английский на максимум:\n\n"
+        "• **Продвинутые уровни B1, B2, C1:** Огромные базы сложной лексики и разговорных конструкций.\n"
+        "• **VIP-путешествия и Сленг:** Элитные поездки и современные разговорные выражения.\n"
+        "• **Детективный режим:** Расследования на английском языке для прокачки логики.\n"
+        "• **Симулятор чата:** Живое общение с ботом на любые темы.\n"
+        "• **500 тем домашних заданий и справочник грамматики:** Полная база правил и упражнений.\n"
+        "• **Ускоренный рейтинг:** +1000 очков в лидерборде для победы в битве за NFT!"
+    )
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="⭐ Купить Премиум (Stars)", callback_data="prem_buy_stars")],
+            [InlineKeyboardButton(text="⬅️ Назад в Премиум-меню", callback_data="back_to_prem_menu")]
+        ]
+    )
+    await callback.message.edit_text(text, reply_markup=keyboard, parse_mode="Markdown")
+    await callback.answer()
+
+@dp.callback_query(F.data == "prem_buy_stars")
+async def prem_buy_stars_cb(callback: types.CallbackQuery):
+    await callback.message.delete()
+    
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="⭐ Заплатить 50 Telegram Stars ✨", pay=True)],
+            [InlineKeyboardButton(text="⬅️ Назад в Премиум-меню", callback_data="back_to_prem_menu")]
+        ]
+    )
+    
+    await callback.message.answer(
+        "⭐ **Оплата Премиум-доступа через Telegram Stars**\n\n"
+        "Нажми кнопку ниже, чтобы совершить безопасный платеж и мгновенно активировать все возможности бота:",
+        reply_markup=keyboard,
+        parse_mode="Markdown"
     )
     await callback.answer()
 
-@dp.callback_query(F.data == "grammar_ref")
-async def setting_grammar(callback: types.CallbackQuery):
-    gram_text = "📖 **Справочник грамматики английского языка:**"
-    try:
-        if "vocabulary_grammar" in globals() and hasattr(vocabulary_grammar, "get_rules"):
-            gram_text = vocabulary_grammar.get_rules()
-    except Exception:
-        pass
-    await callback.message.edit_text(
-        gram_text,
-        reply_markup=InlineKeyboardMarkup(
-            inline_keyboard=[[
-                InlineKeyboardButton(text="🏠 Главное меню", callback_data="to_main")
-            ]]
-        ),
-        parse_mode="Markdown",
+@dp.callback_query(F.data == "back_to_prem_menu")
+async def back_to_prem_menu_cb(callback: types.CallbackQuery):
+    text = (
+        "⭐ **Центр Премиум-доступа и партнерской программы** ✨🚀\n\n"
+        "Выберите нужный пункт в меню ниже:"
     )
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="🔗 Реферальная ссылка", callback_data="prem_ref_link")],
+            [InlineKeyboardButton(text="👥 Вывести друзей (Бонусы)", callback_data="prem_withdraw_refs")],
+            [InlineKeyboardButton(text="ℹ️ О премиум-подписке", callback_data="prem_about")],
+            [InlineKeyboardButton(text="⭐ Купить Премиум (Stars)", callback_data="prem_buy_stars")],
+            [InlineKeyboardButton(text="🏠 Главное меню", callback_data="to_main")]
+        ]
+    )
+    await callback.message.edit_text(text, reply_markup=keyboard, parse_mode="Markdown")
     await callback.answer()
-
-@dp.callback_query(F.data == "premium_info")
-async def setting_premium_info(callback: types.CallbackQuery):
-    prem_text = "⭐ **Премиум-доступ:** Открывает все продвинутые уровни, аудирование, игры и справочники."
-    try:
-        if "vocabulary_premium" in globals() and hasattr(vocabulary_premium, "get_info"):
-            prem_text = vocabulary_premium.get_info()
-    except Exception:
-        pass
-    await callback.message.edit_text(
-        prem_text,
-        reply_markup=InlineKeyboardMarkup(
-            inline_keyboard=[[
-                InlineKeyboardButton(text="🏠 Главное меню", callback_data="to_main")
-            ]]
-        ),
-        parse_mode="Markdown",
-    )
-    await callback.answer()
-
-@dp.message(F.text == "⭐ Get Premium *")
-async def premium_handler(message: types.Message):
-    prices = [types.LabeledPrice(label="Премиум-доступ (B1-C1 + материалы + игры)", amount=50)]
-    await message.answer_invoice(
-        title="Премиум-доступ к боту",
-        description="Откройте продвинутый уровень B1-C1, VIP-путешествия, детективный режим, симулятор чата и 500 тем домашней работы!",
-        payload="premium_access_50_stars",
-        currency="XTR",
-        prices=prices,
-    )
 
 @dp.pre_checkout_query()
 async def pre_checkout_query_handler(pre_checkout_query: PreCheckoutQuery):
@@ -797,9 +1126,9 @@ async def successful_payment_handler(message: types.Message):
     save_database()
 
     await message.answer(
-        "🎉 **Успешная оплата! Премиум-доступ активирован!** ⭐\n"
+        "🎉 **Успешная оплата! Премиум-доступ активирован!** ⭐✨\n"
         "Вам начислено +1000 очков в рейтинг.\n"
-        "Все уровни, словари и VIP-материалы по английскому языку разблокированы!",
+        "Все уровни, словари, домашние задания и VIP-материалы по английскому языку разблокированы!",
         reply_markup=get_main_keyboard(),
         parse_mode="Markdown",
     )
@@ -807,12 +1136,12 @@ async def successful_payment_handler(message: types.Message):
 @dp.callback_query(F.data == "to_main")
 async def callback_to_main(callback: types.CallbackQuery):
     await callback.message.edit_text(
-        "Вы вернулись в главное меню. Используйте клавиатуру внизу 👇"
+        "Вы вернулись в главное меню. Используйте панель управления внизу 👇"
     )
     await callback.answer()
 
 async def main():
-    logger.info("🚀 Бот для изучения английского языка полностью запущен со всеми модулями!")
+    logger.info("🚀 Бот полностью запущен с эмодзи-звёздочками вместо *!")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
