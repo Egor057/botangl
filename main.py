@@ -13,7 +13,6 @@ import asyncio
 import datetime
 import json
 import logging
-import time
 from aiogram import Bot, Dispatcher, F, types
 from aiogram.filters import Command
 from aiogram.fsm.storage.memory import MemoryStorage
@@ -94,9 +93,6 @@ try:
     import vocabulary_homework
     import vocabulary_premium
     import vocabulary_premium_travel
-    import vocabulary_radin_b1
-    import vocabulary_radin_b2
-    import vocabulary_radin_c1
     import vocabulary_reading
     import vocabulary_sprint_a1
     import vocabulary_sprint_a2
@@ -403,48 +399,78 @@ async def sprint_exec_cb(callback: types.CallbackQuery):
     )
     await callback.answer()
 
+QUESTIONS_POOL = [
+    {"q": "Как переводится слово «Success»?", "options": [("Яблоко", False), ("Успех", True), ("Окно", False), ("Бег", False)]},
+    {"q": "Как переводится слово «Travel»?", "options": [("Путешествие", True), ("Стол", False), ("Книга", False), ("Ручка", False)]},
+    {"q": "Выберите правильный перевод слова «Opportunity»:", "options": [("Препятствие", False), ("Возможность", True), ("Опасность", False), ("Привычка", False)]},
+    {"q": "Что означает слово «Reliable»?", "options": [("Надёжный", True), ("Скрытный", False), ("Случайный", False), ("Сложный", False)]},
+    {"q": "Как переводится фраза «To make up one's mind»?", "options": [("Передумать", False), ("Принять решение", True), ("Забыть о деле", False), ("Потерять время", False)]}
+]
+
 @dp.message(F.text == "🎯 Тесты и блиц")
 async def tests_handler(message: types.Message):
-    user_data = get_user(message.from_user.id, message.from_user.first_name)
-    user_data["tests"] += 1
-    user_data["points"] += 25
-    save_database()
+    await send_quiz_question(message, question_index=0, score=0)
 
-    keyboard = InlineKeyboardMarkup(
-        inline_keyboard=[
-            [
-                InlineKeyboardButton(text="A) Apple", callback_data="test_wrong"),
-                InlineKeyboardButton(text="B) Success", callback_data="test_correct"),
-            ],
-            [
-                InlineKeyboardButton(text="C) Window", callback_data="test_wrong"),
-                InlineKeyboardButton(text="D) Running", callback_data="test_wrong"),
-            ],
-            [InlineKeyboardButton(text="🏠 Главное меню", callback_data="to_main")],
-        ]
-    )
-    await message.answer(
-        "🎯 **Тест на словарный запас английского языка:**\n\nКак правильно переводится слово *«Success»*?",
-        reply_markup=keyboard,
-        parse_mode="Markdown",
-    )
+async def send_quiz_question(event, question_index, score):
+    if question_index >= len(QUESTIONS_POOL):
+        user_id = event.from_user.id
+        user_data = get_user(user_id, event.from_user.first_name)
+        user_data["tests"] += 1
+        bonus = score * 15
+        user_data["points"] += bonus
+        save_database()
 
-@dp.callback_query(F.data.startswith("test_"))
-async def callback_test(callback: types.CallbackQuery):
-    if callback.data == "test_correct":
-        await callback.answer("🎉 Абсолютно верно! +25 очков", show_alert=True)
-    else:
-        await callback.answer(
-            "❌ Неверно. Правильный вариант: Success (Успех).", show_alert=True
+        text = (
+            f"🎯 **Тест завершен!**\n\n"
+            f"🏆 Ваш результат: **{score} из {len(QUESTIONS_POOL)}** правильных ответов!\n"
+            f"🚀 Начислено бонусных очков: **+{bonus}**"
         )
-    await callback.message.edit_text(
-        "🎯 Тест завершен!",
-        reply_markup=InlineKeyboardMarkup(
+        keyboard = InlineKeyboardMarkup(
             inline_keyboard=[
+                [InlineKeyboardButton(text="🔄 Пройти еще раз", callback_data="restart_test")],
                 [InlineKeyboardButton(text="🏠 Главное меню", callback_data="to_main")]
             ]
-        ),
-    )
+        )
+        if isinstance(event, types.Message):
+            await event.answer(text, reply_markup=keyboard, parse_mode="Markdown")
+        else:
+            await event.message.edit_text(text, reply_markup=keyboard, parse_mode="Markdown")
+        return
+
+    q_data = QUESTIONS_POOL[question_index]
+    buttons = []
+    for opt_text, is_correct in q_data["options"]:
+        cb_data = f"quiz_{question_index}_{1 if is_correct else 0}_{score}"
+        buttons.append([InlineKeyboardButton(text=opt_text, callback_data=cb_data)])
+    buttons.append([InlineKeyboardButton(text="🏠 Главное меню", callback_data="to_main")])
+
+    text = f"🎯 **Вопрос {question_index + 1} из {len(QUESTIONS_POOL)}:**\n\n{q_data['q']}"
+    keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
+
+    if isinstance(event, types.Message):
+        await event.answer(text, reply_markup=keyboard, parse_mode="Markdown")
+    else:
+        await event.message.edit_text(text, reply_markup=keyboard, parse_mode="Markdown")
+
+@dp.callback_query(F.data.startswith("quiz_"))
+async def quiz_answer_cb(callback: types.CallbackQuery):
+    parts = callback.data.split("_")
+    q_idx = int(parts[1])
+    is_correct = int(parts[2])
+    score = int(parts[3])
+
+    if is_correct:
+        score += 1
+        await callback.answer("🎉 Верно!", show_alert=False)
+    else:
+        await callback.answer("❌ Неверно!", show_alert=False)
+
+    await send_quiz_question(callback, question_index=q_idx + 1, score=score)
+
+@dp.callback_query(F.data == "restart_test")
+async def restart_test_cb(callback: types.CallbackQuery):
+    await send_quiz_question(callback, question_index=0, score=0)
+    await callback.answer()
 
 @dp.message(F.text == "📖 Чтение текстов")
 async def reading_handler(message: types.Message):
@@ -454,7 +480,6 @@ async def reading_handler(message: types.Message):
             [InlineKeyboardButton(text="✈️ Путешествия (200 слов + 25 историй)", callback_data="read_travel")],
             [InlineKeyboardButton(text="⭐ VIP-путешествия (Премиум)", callback_data="read_prem_travel")],
             [InlineKeyboardButton(text="⭐ Сленг и идиомы (Премиум)", callback_data="read_slang")],
-            [InlineKeyboardButton(text="📰 Аудиоматериалы (Radin)", callback_data="read_radin")],
             [InlineKeyboardButton(text="🏠 Главное меню", callback_data="to_main")],
         ]
     )
@@ -671,34 +696,6 @@ async def read_slang_cb(callback: types.CallbackQuery):
     )
     await callback.answer()
 
-@dp.callback_query(F.data == "read_radin")
-async def read_radin_cb(callback: types.CallbackQuery):
-    user_data = get_user(callback.from_user.id, callback.from_user.first_name)
-    lvl = user_data.get("level", "b1")
-    text = f"📰 **Аудиоматериал ({lvl.upper()}):** Загрузка..."
-    try:
-        if lvl == "b2" and "vocabulary_radin_b2" in globals() and hasattr(vocabulary_radin_b2, "get_material"):
-            text = vocabulary_radin_b2.get_material()
-        elif lvl == "c1" and "vocabulary_radin_c1" in globals() and hasattr(vocabulary_radin_c1, "get_material"):
-            text = vocabulary_radin_c1.get_material()
-        elif "vocabulary_radin_b1" in globals() and hasattr(vocabulary_radin_b1, "get_material"):
-            text = vocabulary_radin_b1.get_material()
-    except Exception:
-        pass
-    
-    user_data["points"] += 35
-    save_database()
-    await callback.message.edit_text(
-        f"{text}\n\n✅ Материал прослушан и разобран! +35 очков.",
-        reply_markup=InlineKeyboardMarkup(
-            inline_keyboard=[[
-                InlineKeyboardButton(text="🏠 Главное меню", callback_data="to_main")
-            ]]
-        ),
-        parse_mode="Markdown",
-    )
-    await callback.answer()
-
 @dp.message(F.text == "🎮 Игры и чат")
 async def games_handler(message: types.Message):
     keyboard = InlineKeyboardMarkup(
@@ -876,7 +873,9 @@ async def profile_handler(message: types.Message):
 @dp.callback_query(F.data == "open_profile")
 async def callback_open_profile(callback: types.CallbackQuery):
     await callback.message.delete()
-    await profile_handler(callback.message)
+    fake_msg = callback.message
+    fake_msg.from_user = callback.from_user
+    await profile_handler(fake_msg)
     await callback.answer()
 
 @dp.callback_query(F.data == "change_level")
@@ -918,12 +917,17 @@ async def callback_set_level(callback: types.CallbackQuery):
     save_database()
 
     await callback.answer(f"✅ Уровень успешно изменен на {new_lvl.upper()}!", show_alert=True)
-    await profile_handler(callback.message)
+    fake_msg = callback.message
+    fake_msg.from_user = callback.from_user
+    await profile_handler(fake_msg)
 
 @dp.callback_query(F.data == "open_lb")
 async def callback_open_lb(callback: types.CallbackQuery):
     await callback.message.delete()
-    await leaderboard_handler(callback.message)
+    fake_msg = callback.message
+    fake_msg.from_user = callback.from_user
+    await leaderboard_handler(fake_msg)
+    await callback.answer()
 
 @dp.callback_query(F.data == "prem_buy_cb")
 async def callback_prem_buy_cb(callback: types.CallbackQuery):
@@ -1064,7 +1068,6 @@ async def prem_about_cb(callback: types.CallbackQuery):
         "• **VIP-путешествия и Сленг:** Элитные поездки и современные разговорные выражения.\n"
         "• **Детективный режим:** Расследования на английском языке для прокачки логики.\n"
         "• **Симулятор чата:** Живое общение с ботом на любые темы.\n"
-        "• **500 тем домашних заданий и справочник грамматики:** Полная база правил и упражнений.\n"
         "• **Ускоренный рейтинг:** +1000 очков в лидерборде для победы в битве за NFT!"
     )
     keyboard = InlineKeyboardMarkup(
@@ -1128,7 +1131,7 @@ async def successful_payment_handler(message: types.Message):
     await message.answer(
         "🎉 **Успешная оплата! Премиум-доступ активирован!** ⭐✨\n"
         "Вам начислено +1000 очков в рейтинг.\n"
-        "Все уровни, словари, домашние задания и VIP-материалы по английскому языку разблокированы!",
+        "Все уровни, словари и VIP-материалы по английскому языку разблокированы!",
         reply_markup=get_main_keyboard(),
         parse_mode="Markdown",
     )
@@ -1140,8 +1143,26 @@ async def callback_to_main(callback: types.CallbackQuery):
     )
     await callback.answer()
 
+@dp.message(Command("setprem"))
+async def cmd_set_prem(message: types.Message):
+    args = message.text.split()
+    if len(args) < 2:
+        await message.answer("⚠️ Использование: `/setprem <user_id>`", parse_mode="Markdown")
+        return
+    try:
+        target_id = str(args[1])
+        if target_id in USERS_DB:
+            USERS_DB[target_id]["is_premium"] = True
+            save_database()
+            await message.answer(f"✅ Пользователю `{target_id}` успешно выдан Премиум!")
+            await bot.send_message(int(target_id), "🎉 Администратор выдал вам бесплатный Премиум-доступ!")
+        else:
+            await message.answer("❌ Пользователь не найден в базе данных бота.")
+    except Exception as e:
+        await message.answer(f"❌ Ошибка: {e}")
+
 async def main():
-    logger.info("🚀 Бот полностью запущен с эмодзи-звёздочками вместо *!")
+    logger.info("🚀 Чистый бот запущен без рекламы!")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
