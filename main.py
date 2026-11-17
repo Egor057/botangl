@@ -29,7 +29,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-TOKEN = "9084719584:AAHwV1IsqQGThsoHCJw_sCkvz5ayfnCvMD8"
+TOKEN = os.environ.get("9084719584:AAEowd_Ft_nl164GZZniBsZXV8i6dGqRccY")
 bot = Bot(token=TOKEN)
 storage = MemoryStorage()
 dp = Dispatcher(storage=storage)
